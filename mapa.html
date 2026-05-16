@@ -235,7 +235,6 @@
   <button class="disc-tab on" data-disc="ALL"  onclick="setDisc('ALL',this)">Todos</button>
   <button class="disc-tab"    data-disc="TR"   onclick="setDisc('TR',this)">🥾 Trail</button>
   <button class="disc-tab"    data-disc="XC"   onclick="setDisc('XC',this)">🚵 XC</button>
-  <button class="disc-tab"    data-disc="ED"   onclick="setDisc('ED',this)">🚵 Enduro</button>
   <button class="disc-tab"    data-disc="DH"   onclick="setDisc('DH',this)">🚵 DH</button>
   <button class="disc-tab"    data-disc="RP"   onclick="setDisc('RP',this)">🛣️ Ripio</button>
 </div>
@@ -386,12 +385,18 @@ function loadSenderos() {
     if (s.id === 'camino_principal') return;  // ripio se carga aparte en loadRipio
     map.addSource('s-'+s.id, { type:'geojson', data:{ type:'Feature', geometry:{ type:'LineString', coordinates:s.coords } } });
     map.addLayer({ id:'glow-'+s.id, type:'line', source:'s-'+s.id, layout:{'line-join':'round','line-cap':'round'}, paint:{'line-color':s.color,'line-width':14,'line-opacity':0.10,'line-blur':6} });
-    map.addLayer({ id:'line-'+s.id, type:'line', source:'s-'+s.id, layout:{'line-join':'round','line-cap':'round'}, paint:{'line-color':s.color,'line-width':4.5,'line-opacity':1} });
+    // Líneas unidireccionales: dasharray para sugerir dirección
+    const linePaint = s.unidireccional
+      ? {'line-color':s.color,'line-width':4.5,'line-opacity':1,'line-dasharray':[3,1.5]}
+      : {'line-color':s.color,'line-width':4.5,'line-opacity':1};
+    map.addLayer({ id:'line-'+s.id, type:'line', source:'s-'+s.id, layout:{'line-join':'round','line-cap':'round'}, paint:linePaint });
     map.on('click','line-'+s.id, () => openPanel(s.id));
     map.on('mouseenter','line-'+s.id, () => map.getCanvas().style.cursor='pointer');
     map.on('mouseleave','line-'+s.id, () => map.getCanvas().style.cursor='');
     if (s.geofence) {
+      // Marker inicio: círculo lleno con color
       mkrDot(s.geofence.inicio.lng, s.geofence.inicio.lat, s.color, s.id);
+      // Marker fin: si unidireccional con sentido bajada, marcar como flecha hacia abajo
       mkrDot(s.geofence.fin.lng,    s.geofence.fin.lat,    s.color, s.id);
     }
   });
@@ -635,7 +640,6 @@ function closeRuta() {
 const DISC_LABELS = {
   TR: '🥾 Trail',
   XC: '🚵 XC',
-  ED: '🚵 Enduro',
   DH: '🚵 Downhill',
   RP: '🛣️ Ripio'
 };
@@ -673,6 +677,17 @@ function openPanel(id) {
     b.textContent = DISC_LABELS[d] || d;
     tags.appendChild(b);
   });
+
+  // Tag unidireccional + sentido (si aplica)
+  if (s.unidireccional) {
+    const u = document.createElement('span');
+    u.className = 'ptag';
+    u.style.background = 'rgba(245,158,11,.18)';
+    u.style.color = '#FBBF24';
+    const arrow = s.sentido === 'bajada' ? '↓' : (s.sentido === 'subida' ? '↑' : '→');
+    u.textContent = `${arrow} Unidireccional · ${s.sentido || 'sentido único'}`;
+    tags.appendChild(u);
+  }
 
   document.getElementById('panel').classList.add('open');
   S.panelOpen = true;

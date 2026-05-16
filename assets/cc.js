@@ -122,37 +122,55 @@ window.CC = (() => {
 
   /**
    * Verifica si el usuario está dentro de algún geofence y dispara alerta.
-   * Cada geofence se activa UNA SOLA VEZ por sesión.
+   * 
+   * LÓGICA DEL MÁS CERCANO:
+   * Si la persona está dentro de VARIOS geofences simultáneamente (zonas
+   * donde se solapan radios, como el acceso al Tótem o transiciones entre
+   * senderos), solo se dispara la alerta del geofence cuyo CENTRO esté
+   * más cercano al GPS de la persona. Los demás se ignoran en este tick.
+   *
+   * Cada geofence se activa máximo UNA VEZ por sesión. Si después la
+   * persona avanza y entra exclusivamente en otro geofence (que aún no
+   * se ha disparado), ese se dispara normalmente.
+   *
+   * Esto resuelve los conflictos de proximidad sin necesidad de radios
+   * súper chicos — es el mismo enfoque de Wikiloc/Strava.
    */
   function checkGeofences(userLat, userLng) {
     if (typeof window.SENDEROS === 'undefined') return;
 
+    // 1. Recolectar TODOS los geofences donde la persona está dentro del radio
+    const activos = [];
     for (const s of window.SENDEROS) {
       if (!s.geofence) continue;
 
-      // Inicio
       if (s.geofence.inicio) {
         const key = s.id + '_inicio';
-        if (!_visited.has(key)) {
-          const d = _distMeters(userLat, userLng, s.geofence.inicio.lat, s.geofence.inicio.lng);
-          if (d <= (s.geofence.inicio.radio || RADIO_GEOFENCE_M)) {
-            _visited.add(key);
-            _triggerAlert(s, 'inicio');
-          }
+        const d   = _distMeters(userLat, userLng, s.geofence.inicio.lat, s.geofence.inicio.lng);
+        if (d <= (s.geofence.inicio.radio || RADIO_GEOFENCE_M)) {
+          activos.push({ key, sendero: s, tipo: 'inicio', distancia: d });
         }
       }
-      // Fin
       if (s.geofence.fin) {
         const key = s.id + '_fin';
-        if (!_visited.has(key)) {
-          const d = _distMeters(userLat, userLng, s.geofence.fin.lat, s.geofence.fin.lng);
-          if (d <= (s.geofence.fin.radio || RADIO_GEOFENCE_M)) {
-            _visited.add(key);
-            _triggerAlert(s, 'fin');
-          }
+        const d   = _distMeters(userLat, userLng, s.geofence.fin.lat, s.geofence.fin.lng);
+        if (d <= (s.geofence.fin.radio || RADIO_GEOFENCE_M)) {
+          activos.push({ key, sendero: s, tipo: 'fin', distancia: d });
         }
       }
     }
+
+    if (activos.length === 0) return;
+
+    // 2. Filtrar los que aún NO se dispararon en esta sesión
+    const candidatos = activos.filter(a => !_visited.has(a.key));
+    if (candidatos.length === 0) return;
+
+    // 3. Disparar SOLO el de centro más cercano
+    candidatos.sort((a, b) => a.distancia - b.distancia);
+    const winner = candidatos[0];
+    _visited.add(winner.key);
+    _triggerAlert(winner.sendero, winner.tipo);
   }
 
   function _triggerAlert(s, tipo) {

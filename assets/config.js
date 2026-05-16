@@ -37,17 +37,16 @@ const PARQUE_CONFIG = {
   },
 
   // --- Métricas del parque (calculadas en base a senderos.js) ---
-  total_km:        26.8,
-  total_senderos:  12,
+  total_km:        29.7,
+  total_senderos:  14,
   total_subsegmentos: 3,
 
   // --- Disciplinas soportadas en este parque ---
   // RP = Ripio (camino vehicular)
   // TR = Trail / Trekking / Caminata
   // XC = Cross Country MTB
-  // ED = Enduro MTB
   // DH = Downhill MTB
-  disciplinas_disponibles: ['TR', 'ED', 'XC', 'DH', 'RP'],
+  disciplinas_disponibles: ['TR', 'XC', 'DH', 'RP'],
 };
 
 
