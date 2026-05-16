@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <title>Supervisor · Bosque Abierto</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet"/>
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+
+  <!-- Config + senderos primero (orden importa) -->
+  <script src="assets/config.js"></script>
+  <script src="assets/senderos.js"></script>
+
+  <!-- Firebase con config desde FIREBASE_CONFIG (centralizado) -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    import { getDatabase, ref, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+    const app = initializeApp(window.FIREBASE_CONFIG);
+    const db = getDatabase(app);
+    window._db = db;
+    window._ref = ref;
+    window._onValue = onValue;
+    window._remove = remove;
+    window._firebaseReady = true;
+    window.dispatchEvent(new Event('firebaseReady'));
+  </script>
+
+  <style>
+    :root {
+      --bg:   #080C0A;
+      --teal: #3EC9A7;
+      --t2:   rgba(62,201,167,0.12);
+      --w:    #F5F9F7;
+      --m:    rgba(245,249,247,0.5);
+      --ui:   rgba(8,12,10,0.9);
+      --line: rgba(245,249,247,0.09);
+      --red:  #EF4444;
+      --amber:#F5C242;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--w); height:100dvh; overflow:hidden; -webkit-font-smoothing:antialiased; }
+
+    /* PIN SCREEN */
+    .pin-screen { position:absolute; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; background:var(--bg); }
+    .pin-screen.hidden { display:none; }
+    .pin-card { width:100%; max-width:320px; padding:40px 32px; text-align:center; margin:20px; }
+    .pin-logo { font-size:36px; margin-bottom:20px; }
+    .pin-title { font-size:22px; font-weight:900; letter-spacing:-0.5px; margin-bottom:6px; }
+    .pin-sub { font-size:13px; color:var(--m); margin-bottom:36px; line-height:1.5; }
+    .pin-dots { display:flex; justify-content:center; gap:12px; margin-bottom:32px; }
+    .pin-dot { width:14px; height:14px; border-radius:50%; border:2px solid rgba(245,249,247,0.2); background:transparent; transition:all .15s; }
+    .pin-dot.filled { background:var(--teal); border-color:var(--teal); }
+    .pin-dot.error  { background:var(--red);  border-color:var(--red); animation:shake .3s; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+    .pin-keypad { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; max-width:240px; margin:0 auto; }
+    .pin-key { aspect-ratio:1; border-radius:50%; background:rgba(245,249,247,0.07); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:600; cursor:pointer; -webkit-tap-highlight-color:transparent; transition:all .1s; }
+    .pin-key:active { background:rgba(62,201,167,0.15); transform:scale(.93); }
+    .pin-key.del { font-size:16px; color:var(--m); }
+    .pin-key.empty { cursor:default; background:transparent; border:none; }
+    .pin-error { margin-top:20px; font-size:13px; color:var(--red); opacity:0; transition:opacity .2s; }
+    .pin-error.show { opacity:1; }
+
+    /* MAP */
+    #map { position:absolute; inset:0; }
+    .maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right,.maplibregl-ctrl-top-left,.maplibregl-ctrl-top-right { display:none !important; }
+
+    /* TOPBAR */
+    .topbar { position:absolute; top:0; left:0; right:0; z-index:10; padding:12px 14px; display:flex; align-items:center; gap:10px; background:linear-gradient(to bottom, rgba(8,12,10,0.95) 0%, transparent 100%); }
+    .tb-icon { font-size:20px; }
+    .tb-info { flex:1; }
+    .tb-title { font-size:14px; font-weight:700; }
+    .tb-sub { font-size:11px; color:var(--teal); margin-top:1px; }
+    .tb-badge { display:flex; align-items:center; gap:6px; background:var(--ui); border:1px solid var(--line); border-radius:20px; padding:6px 12px; font-size:11px; font-weight:600; backdrop-filter:blur(12px); }
+    .live-dot { width:7px; height:7px; border-radius:50%; background:var(--teal); animation:live 1.5s infinite; }
+    @keyframes live { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
+
+    /* VISITORS PANEL */
+    .visitors-panel { position:absolute; bottom:0; left:0; right:0; z-index:10; background:var(--ui); border-top:1px solid var(--line); border-radius:20px 20px 0 0; backdrop-filter:blur(24px); max-height:50vh; }
+    .vp-handle { width:32px; height:3px; background:rgba(245,249,247,.15); border-radius:2px; margin:12px auto 0; }
+    .vp-header { padding:12px 18px 8px; display:flex; align-items:center; justify-content:space-between; }
+    .vp-title { font-size:13px; font-weight:700; }
+    .vp-count { font-size:11px; font-weight:600; color:var(--teal); background:var(--t2); padding:3px 10px; border-radius:20px; }
+    .vp-list { padding:0 14px 24px; overflow-y:auto; max-height:35vh; display:flex; flex-direction:column; gap:6px; }
+    .visitor-row { display:flex; align-items:center; gap:10px; padding:10px 12px; background:rgba(245,249,247,0.04); border:1px solid var(--line); border-radius:10px; cursor:pointer; transition:background .15s; -webkit-tap-highlight-color:transparent; }
+    .visitor-row:active { background:rgba(62,201,167,.08); }
+    .v-avatar { width:32px; height:32px; border-radius:50%; background:var(--t2); border:1px solid rgba(62,201,167,.25); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+    .v-info { flex:1; min-width:0; }
+    .v-nombre { font-size:12px; font-weight:700; color:var(--w); }
+    .v-meta { font-size:10px; color:var(--m); margin-top:2px; }
+    .v-status { display:flex; align-items:center; gap:4px; font-size:10px; font-weight:600; }
+    .v-dot { width:6px; height:6px; border-radius:50%; }
+    .v-dot.active { background:var(--teal); }
+    .empty-state { text-align:center; padding:32px 20px; font-size:13px; color:var(--m); }
+    .empty-state div { font-size:28px; margin-bottom:8px; }
+
+    /* MAP CONTROLS */
+    .map-ctrl { position:absolute; right:14px; bottom:220px; z-index:10; display:flex; flex-direction:column; gap:6px; }
+    .ctrl-btn { width:38px; height:38px; background:var(--ui); border:1px solid var(--line); border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; backdrop-filter:blur(12px); font-size:18px; color:var(--w); font-weight:600; }
+
+    /* STYLE SELECTOR */
+    .style-bar { position:absolute; bottom:220px; left:14px; z-index:10; display:flex; gap:5px; background:var(--ui); border:1px solid var(--line); border-radius:14px; padding:5px; backdrop-filter:blur(16px); }
+    .style-btn { display:flex; flex-direction:column; align-items:center; gap:2px; padding:7px 10px; border-radius:10px; cursor:pointer; border:none; background:transparent; color:var(--m); font-family:'Inter',sans-serif; transition:all .15s; }
+    .style-btn.on { background:rgba(245,249,247,.1); color:var(--w); }
+    .style-btn .s-ic { font-size:15px; }
+    .style-btn .s-lb { font-size:8px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; }
+
+    /* VISITOR MARKER */
+    .v-marker { display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer; }
+    .v-marker-ic { width:32px; height:32px; border-radius:50%; background:var(--teal); border:3px solid white; box-shadow:0 2px 8px rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; font-size:14px; animation:pulse-v 2s infinite; }
+    @keyframes pulse-v { 0%,100%{box-shadow:0 2px 8px rgba(0,0,0,.5),0 0 0 0 rgba(62,201,167,.4)} 50%{box-shadow:0 2px 8px rgba(0,0,0,.5),0 0 0 8px rgba(62,201,167,0)} }
+    .v-marker-lbl { font-family:'Inter',sans-serif; font-size:9px; font-weight:700; background:rgba(8,12,10,.8); color:var(--w); padding:2px 6px; border-radius:5px; white-space:nowrap; border:1px solid rgba(255,255,255,.1); backdrop-filter:blur(4px); }
+  </style>
+</head>
+<body>
+
+<!-- PIN SCREEN -->
+<div class="pin-screen" id="pin-screen">
+  <div class="pin-card">
+    <div class="pin-logo">🌿</div>
+    <div class="pin-title">Modo Supervisor</div>
+    <div class="pin-sub" id="pin-sub">Acceso restringido<br/>Ingresa el PIN de acceso</div>
+
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+    </div>
+
+    <div class="pin-keypad">
+      <div class="pin-key" onclick="pinKey('1')">1</div>
+      <div class="pin-key" onclick="pinKey('2')">2</div>
+      <div class="pin-key" onclick="pinKey('3')">3</div>
+      <div class="pin-key" onclick="pinKey('4')">4</div>
+      <div class="pin-key" onclick="pinKey('5')">5</div>
+      <div class="pin-key" onclick="pinKey('6')">6</div>
+      <div class="pin-key" onclick="pinKey('7')">7</div>
+      <div class="pin-key" onclick="pinKey('8')">8</div>
+      <div class="pin-key" onclick="pinKey('9')">9</div>
+      <div class="pin-key empty"></div>
+      <div class="pin-key" onclick="pinKey('0')">0</div>
+      <div class="pin-key del" onclick="pinDel()">⌫</div>
+    </div>
+
+    <div class="pin-error" id="pin-error">PIN incorrecto. Intenta nuevamente.</div>
+  </div>
+</div>
+
+<!-- MAP -->
+<div id="map"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-icon">🌿</div>
+  <div class="tb-info">
+    <div class="tb-title" id="tb-title">Supervisor</div>
+    <div class="tb-sub" id="tb-sub">Conectando...</div>
+  </div>
+  <div class="tb-badge">
+    <div class="live-dot"></div>
+    <span id="visitor-count">0</span> activos
+  </div>
+</div>
+
+<!-- STYLE SELECTOR -->
+<div class="style-bar">
+  <button class="style-btn on" onclick="setStyle('satellite',this)"><span class="s-ic">🛰️</span><span class="s-lb">Satélite</span></button>
+  <button class="style-btn" onclick="setStyle('topo',this)"><span class="s-ic">🏔️</span><span class="s-lb">Terreno</span></button>
+  <button class="style-btn" onclick="setStyle('streets',this)"><span class="s-ic">🗺️</span><span class="s-lb">Mapa</span></button>
+</div>
+
+<!-- MAP CONTROLS -->
+<div class="map-ctrl">
+  <div class="ctrl-btn" onclick="map.zoomIn()">+</div>
+  <div class="ctrl-btn" onclick="map.zoomOut()">−</div>
+  <div class="ctrl-btn" onclick="centrarMapa()">⌖</div>
+</div>
+
+<!-- VISITORS PANEL -->
+<div class="visitors-panel">
+  <div class="vp-handle"></div>
+  <div class="vp-header">
+    <div class="vp-title">Visitantes en el parque</div>
+    <div class="vp-count" id="vp-count">0 activos</div>
+  </div>
+  <div class="vp-list" id="vp-list">
+    <div class="empty-state"><div>🌲</div>Sin visitantes activos en este momento</div>
+  </div>
+</div>
+
+<script>
+// ─── HEADER DINÁMICO ───────────────────────────────────────
+document.getElementById('tb-title').textContent = 'Supervisor · ' + PARQUE_CONFIG.nombre;
+document.getElementById('pin-sub').innerHTML = PARQUE_CONFIG.nombre + ' · Acceso restringido<br/>Ingresa el PIN de acceso';
+
+// ─── PIN (desde config.js) ─────────────────────────────────
+let pinActual = '';
+
+function pinKey(n) {
+  if (pinActual.length >= 4) return;
+  pinActual += n;
+  updateDots();
+  if (pinActual.length === 4) setTimeout(checkPin, 100);
+}
+
+function pinDel() {
+  pinActual = pinActual.slice(0, -1);
+  updateDots();
+  document.getElementById('pin-error').classList.remove('show');
+}
+
+function updateDots() {
+  for (let i = 0; i < 4; i++) {
+    const d = document.getElementById('d' + i);
+    d.classList.toggle('filled', i < pinActual.length);
+    d.classList.remove('error');
+  }
+}
+
+function checkPin() {
+  if (pinActual === window.PIN_SUPERVISOR) {
+    document.getElementById('pin-screen').classList.add('hidden');
+    initSupervisor();
+  } else {
+    for (let i = 0; i < 4; i++) document.getElementById('d' + i).classList.add('error');
+    document.getElementById('pin-error').classList.add('show');
+    setTimeout(() => { pinActual = ''; updateDots(); }, 800);
+  }
+}
+
+// ─── MAPA ──────────────────────────────────────────────────
+const map = new maplibregl.Map({
+  container: 'map',
+  style: {
+    version: 8,
+    sources: { base: { type:'raster', tiles:[TILES_CONFIG.satellite.url], tileSize:256 } },
+    layers: [{ id:'base-layer', type:'raster', source:'base' }]
+  },
+  center: PARQUE_CONFIG.centro,
+  zoom: PARQUE_CONFIG.zoom_inicial,
+  attributionControl: false
+});
+
+function setStyle(style, btn) {
+  document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  map.getSource('base').setTiles([TILES_CONFIG[style].url]);
+}
+
+map.on('load', () => {
+  // Senderos como referencia (baja opacidad)
+  SENDEROS.forEach(s => {
+    if (s.id === 'camino_principal') return;  // ripio se renderiza aparte
+    map.addSource('s-'+s.id, { type:'geojson', data:{ type:'Feature', geometry:{ type:'LineString', coordinates:s.coords } } });
+    map.addLayer({
+      id:'line-'+s.id, type:'line', source:'s-'+s.id,
+      layout:{'line-join':'round','line-cap':'round'},
+      paint:{'line-color':s.color,'line-width':3,'line-opacity':0.55}
+    });
+  });
+  // Ripio
+  map.addSource('ripio', { type:'geojson', data:{ type:'Feature', geometry:{ type:'LineString', coordinates:RIPIO_ACCESO } } });
+  map.addLayer({
+    id:'ripio', type:'line', source:'ripio',
+    layout:{'line-join':'round','line-cap':'round'},
+    paint:{'line-color':'#F5C242','line-width':2.5,'line-opacity':.4,'line-dasharray':[2,3]}
+  });
+});
+
+function centrarMapa() {
+  map.flyTo({ center: PARQUE_CONFIG.centro, zoom: PARQUE_CONFIG.zoom_inicial, duration:600 });
+}
+
+// ─── SUPERVISOR LOGIC ──────────────────────────────────────
+const visitantesMarkers = {};
+const TIMEOUT_INACTIVO = 5 * 60 * 1000;   // 5 min sin actualizar = inactivo
+
+function initSupervisor() {
+  document.getElementById('tb-sub').textContent = PARQUE_CONFIG.subtitulo + ' · Tiempo real';
+
+  const initFB = () => {
+    const dbRef = window._ref(window._db, 'visitantes');
+    window._onValue(dbRef, (snapshot) => {
+      renderVisitantes(snapshot.val() || {});
+    });
+  };
+
+  if (window._firebaseReady) initFB();
+  else window.addEventListener('firebaseReady', initFB);
+}
+
+function renderVisitantes(data) {
+  const ahora = Date.now();
+  const activos = {};
+
+  Object.entries(data).forEach(([id, v]) => {
+    const ts = typeof v.ts === 'number' ? v.ts : (v.ts ? new Date(v.ts).getTime() : 0);
+    if (ts && (ahora - ts) < TIMEOUT_INACTIVO) {
+      activos[id] = Object.assign({}, v, { _ts: ts });
+    }
+  });
+
+  const count = Object.keys(activos).length;
+  document.getElementById('visitor-count').textContent = count;
+  document.getElementById('vp-count').textContent = count + ' activo' + (count !== 1 ? 's' : '');
+
+  // Limpiar markers viejos
+  Object.keys(visitantesMarkers).forEach(id => {
+    if (!activos[id]) {
+      visitantesMarkers[id].remove();
+      delete visitantesMarkers[id];
+    }
+  });
+
+  // Crear / actualizar markers
+  Object.entries(activos).forEach(([id, v]) => {
+    if (!v.lat || !v.lng) return;
+    if (visitantesMarkers[id]) {
+      visitantesMarkers[id].setLngLat([v.lng, v.lat]);
+    } else {
+      const el = crearMarkerVisitante(v.nombre || 'Visitante');
+      const marker = new maplibregl.Marker({ element:el, anchor:'bottom' })
+        .setLngLat([v.lng, v.lat])
+        .addTo(map);
+      el.addEventListener('click', () => {
+        map.flyTo({ center:[v.lng, v.lat], zoom:16, duration:600 });
+      });
+      visitantesMarkers[id] = marker;
+    }
+  });
+
+  // Lista lateral
+  const lista = document.getElementById('vp-list');
+  if (count === 0) {
+    lista.innerHTML = '<div class="empty-state"><div>🌲</div>Sin visitantes activos en este momento</div>';
+    return;
+  }
+
+  lista.innerHTML = '';
+  Object.entries(activos).forEach(([id, v]) => {
+    const edad = Math.floor((Date.now() - v._ts) / 1000);
+    const tiempoStr = edad < 60 ? 'hace ' + edad + 's' : 'hace ' + Math.floor(edad/60) + ' min';
+    const row = document.createElement('div');
+    row.className = 'visitor-row';
+    row.innerHTML = `
+      <div class="v-avatar">🧑</div>
+      <div class="v-info">
+        <div class="v-nombre">${v.nombre || 'Visitante'}</div>
+        <div class="v-meta">${v.email || '—'} · ${tiempoStr}</div>
+      </div>
+      <div class="v-status">
+        <div class="v-dot active"></div>
+        <span style="color:var(--teal);font-size:10px">Activo</span>
+      </div>
+    `;
+    row.addEventListener('click', () => {
+      if (v.lat && v.lng) map.flyTo({ center:[v.lng, v.lat], zoom:16, duration:600 });
+    });
+    lista.appendChild(row);
+  });
+}
+
+function crearMarkerVisitante(nombre) {
+  const wrap = document.createElement('div');
+  wrap.className = 'v-marker';
+  wrap.innerHTML = `<div class="v-marker-ic">🧑</div><div class="v-marker-lbl">${nombre.split(' ')[0]}</div>`;
+  return wrap;
+}
+</script>
+</body>
+</html>

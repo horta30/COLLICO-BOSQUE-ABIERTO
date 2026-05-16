@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Parque Collico · Registro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+
+  <!-- Config primero -->
+  <script src="assets/config.js"></script>
+
+  <!-- Firebase con config desde FIREBASE_CONFIG -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+    const app = initializeApp(window.FIREBASE_CONFIG);
+    window._db  = getDatabase(app);
+    window._ref = ref;
+    window._set = set;
+  </script>
+
+  <style>
+    :root {
+      --bg:   #080C0A;
+      --teal: #3EC9A7;
+      --t2:   rgba(62,201,167,0.11);
+      --w:    #F5F9F7;
+      --m:    rgba(245,249,247,0.5);
+      --dim:  rgba(245,249,247,0.06);
+      --line: rgba(245,249,247,0.08);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Inter',sans-serif;
+      background:var(--bg); color:var(--w);
+      min-height:100svh; display:flex; flex-direction:column;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    header {
+      padding:16px 20px;
+      display:flex; align-items:center; justify-content:space-between;
+      border-bottom:1px solid var(--line); flex-shrink:0;
+    }
+    .back { display:flex; align-items:center; gap:6px; color:var(--m); text-decoration:none; font-size:13px; font-weight:500; }
+    .hd-tag { font-size:11px; font-weight:600; color:var(--teal); }
+
+    main { flex:1; padding:32px 20px 56px; max-width:420px; margin:0 auto; width:100%; }
+
+    .kicker { display:flex; align-items:center; gap:8px; font-size:10px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--teal); margin-bottom:10px; }
+    .kicker::before { content:''; display:block; width:14px; height:1px; background:var(--teal); }
+
+    h1 { font-size:28px; font-weight:900; letter-spacing:-1px; line-height:1.1; margin-bottom:6px; }
+    .sub { font-size:13px; color:var(--m); line-height:1.6; margin-bottom:24px; }
+
+    .field { margin-bottom:12px; }
+    .field label { display:block; font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--m); margin-bottom:6px; }
+    .field input {
+      width:100%; padding:13px 14px; font-size:16px;
+      background:var(--dim); border:1.5px solid var(--line);
+      border-radius:10px; color:var(--w);
+      font-family:'Inter',sans-serif; outline:none;
+      transition:border-color .15s; -webkit-appearance:none;
+    }
+    .field input::placeholder { color:rgba(245,249,247,.2); }
+    .field input:focus { border-color:var(--teal); background:var(--t2); }
+    .phone-row { display:flex; gap:8px; }
+    .prefix { padding:13px 12px; background:var(--dim); border:1.5px solid var(--line); border-radius:10px; color:var(--m); font-size:15px; font-family:'Inter',sans-serif; white-space:nowrap; flex-shrink:0; }
+
+    .tc-section { margin:20px 0; }
+    .tc-label { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--m); margin-bottom:8px; }
+
+    .tc-scroll {
+      background:var(--dim); border:1px solid var(--line);
+      border-radius:10px; padding:14px;
+      height:160px; overflow-y:auto;
+      font-size:11px; line-height:1.65; color:var(--m);
+      margin-bottom:12px;
+    }
+    .tc-scroll::-webkit-scrollbar { width:4px; }
+    .tc-scroll::-webkit-scrollbar-track { background:transparent; }
+    .tc-scroll::-webkit-scrollbar-thumb { background:rgba(245,249,247,.15); border-radius:2px; }
+    .tc-scroll h4 { font-size:11px; font-weight:700; color:var(--w); margin:10px 0 4px; }
+    .tc-scroll h4:first-child { margin-top:0; }
+    .tc-scroll p { margin-bottom:6px; }
+    .tc-scroll ul { padding-left:16px; margin-bottom:6px; }
+    .tc-scroll ul li { margin-bottom:3px; }
+
+    .checks { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+    .check-row {
+      display:flex; align-items:flex-start; gap:12px;
+      padding:12px 14px;
+      background:var(--dim); border:1.5px solid var(--line);
+      border-radius:10px; cursor:pointer;
+      transition:border-color .15s;
+      -webkit-tap-highlight-color:transparent;
+    }
+    .check-row.checked { border-color:var(--teal); background:var(--t2); }
+    .check-box {
+      width:20px; height:20px; flex-shrink:0;
+      border:2px solid rgba(245,249,247,.25); border-radius:5px;
+      background:transparent; margin-top:1px;
+      display:flex; align-items:center; justify-content:center;
+      transition:all .15s;
+    }
+    .check-row.checked .check-box { background:var(--teal); border-color:var(--teal); }
+    .check-box svg { display:none; }
+    .check-row.checked .check-box svg { display:block; }
+    .check-txt { font-size:12px; color:var(--m); line-height:1.5; flex:1; }
+    .check-txt strong { color:var(--w); font-weight:600; }
+
+    .submit {
+      width:100%; padding:16px;
+      background:var(--teal); color:#050A07;
+      font-family:'Inter',sans-serif; font-size:15px; font-weight:700;
+      border:none; border-radius:50px; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      -webkit-tap-highlight-color:transparent;
+      transition:all .15s; opacity:.4; pointer-events:none;
+    }
+    .submit.enabled { opacity:1; pointer-events:auto; }
+    .submit.enabled:active { background:#5DD9BA; }
+    .submit.loading { opacity:.6; pointer-events:none; }
+
+    .legal { text-align:center; font-size:10px; color:rgba(245,249,247,.18); margin-top:14px; line-height:1.8; }
+  </style>
+</head>
+<body>
+
+<script>
+  if (sessionStorage.getItem('collico_v')) window.location.replace('mapa.html');
+</script>
+
+<header>
+  <a href="landing.html" class="back">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Volver
+  </a>
+  <span class="hd-tag" id="hd-tag">Parque Collico</span>
+</header>
+
+<main>
+  <div class="kicker">Registro de visita</div>
+  <h1>Tu acceso<br/>al bosque.</h1>
+  <p class="sub">Completa tu registro para activar el GPS y acceder al mapa de senderos.</p>
+
+  <div class="field">
+    <label>Nombre completo</label>
+    <input type="text" id="nombre" placeholder="Tu nombre" autocomplete="given-name"/>
+  </div>
+  <div class="field">
+    <label>Email</label>
+    <input type="email" id="email" placeholder="tu@email.com" autocomplete="email"/>
+  </div>
+  <div class="field">
+    <label>Teléfono</label>
+    <div class="phone-row">
+      <div class="prefix">+56 9</div>
+      <input type="tel" id="tel" placeholder="8 dígitos" maxlength="8" autocomplete="tel"/>
+    </div>
+  </div>
+
+  <div class="tc-section">
+    <div class="tc-label">Términos y condiciones</div>
+    <div class="tc-scroll">
+      <h4>COMPROMISO DE CONDUCTA Y LIBERACIÓN DE RESPONSABILIDAD — PROGRAMA BOSQUE ABIERTO</h4>
+
+      <h4>PRIMERO: AUTORIZACIÓN DE INGRESO</h4>
+      <p>El Visitante declara haber sido autorizado por Forestal Arauco S.A. para ingresar al predio parte de la Red de parques y senderos Bosque Abierto, única y exclusivamente para llevar a cabo actividades deportivas, de turismo, recreación, cultura e investigación en el marco del Programa Bosque Abierto.</p>
+
+      <h4>SEGUNDO: DECLARACIONES DEL VISITANTE</h4>
+      <p>El Visitante declara conocer y aceptar que:</p>
+      <ul>
+        <li>El Predio es de propiedad exclusiva de Forestal Arauco, quien puede suspender o revocar la autorización en cualquier momento.</li>
+        <li>Forestal Arauco no está obligada a disponer de elementos de seguridad, vigilantes, asistencia médica, estacionamientos ni servicios higiénicos.</li>
+        <li>Los riesgos asociados a la práctica de actividades, incluyendo lesiones graves o muerte, son de cargo del Visitante, quien los conoce y acepta expresamente.</li>
+        <li>Forestal Arauco podrá almacenar y tratar los datos personales conforme a la Ley N°19.628 sobre Protección de la Vida Privada.</li>
+      </ul>
+
+      <h4>TERCERO: OBLIGACIONES DEL VISITANTE</h4>
+      <p>El Visitante se obliga a: observar comportamiento ordenado y respetuoso; cuidar el entorno natural; contar con elementos de seguridad para la práctica deportiva; mantenerse en circuitos demarcados; respetar horarios; y cumplir las instrucciones de Forestal Arauco.</p>
+
+      <h4>CUARTO: OBLIGACIONES DE NO HACER</h4>
+      <p>Queda estrictamente prohibido: desarrollar actividades comerciales; acampar; hacer fuego; consumir alcohol o sustancias ilícitas; modificar senderos o circuitos; retirar elementos de demarcación; e ingresar animales domésticos o salvajes.</p>
+
+      <h4>QUINTO: LIBERACIÓN DE RESPONSABILIDAD</h4>
+      <p>El Visitante libera total y completamente a Forestal Arauco de responsabilidad por cualquier pérdida, daño físico o psíquico, lesión o muerte que pueda sufrir con ocasión de la visita. El Visitante renuncia a todo derecho de reclamo o demanda ante cualquier autoridad o tribunal por estos conceptos.</p>
+      <p>El Visitante asume la obligación de indemnizar todo daño imputable a su negligencia, dolo o culpa que pueda sufrir el Predio, sus recursos naturales, o cualquier tercero.</p>
+
+      <h4>SEXTO: DOMICILIO Y COMPETENCIA</h4>
+      <p>Para todos los efectos derivados del presente instrumento, se fija domicilio en la comuna donde se encuentra el Predio y se prorroga competencia ante los Tribunales Ordinarios de Justicia de dicho lugar.</p>
+    </div>
+  </div>
+
+  <div class="checks">
+    <div class="check-row" id="chk-tc" onclick="toggleCheck('chk-tc')">
+      <div class="check-box">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#050A07" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <div class="check-txt">
+        <strong>He leído y acepto los Términos y Condiciones</strong> del Programa Bosque Abierto de Forestal Arauco, incluyendo la liberación de responsabilidad, el compromiso de conducta y el uso de mi ubicación GPS por el equipo del parque con fines de seguridad.
+      </div>
+    </div>
+  </div>
+
+  <button class="submit" id="submit-btn" onclick="go()">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    Entrar al Parque con GPS
+  </button>
+
+  <p class="legal" id="legal">ARAUCO Bosque Abierto · Tus datos se tratan conforme a la Ley N°19.628</p>
+</main>
+
+<script>
+// Mostrar nombre del parque (de PARQUE_CONFIG, replicable)
+document.getElementById('hd-tag').textContent = PARQUE_CONFIG.nombre;
+document.getElementById('legal').innerHTML = `ARAUCO ${PARQUE_CONFIG.programa} · ${PARQUE_CONFIG.ubicacion}<br/>Tus datos se tratan conforme a la Ley N°19.628`;
+
+const checks = { 'chk-tc': false };
+
+function toggleCheck(id) {
+  checks[id] = !checks[id];
+  document.getElementById(id).classList.toggle('checked', checks[id]);
+  updateBtn();
+}
+
+function updateBtn() {
+  const allChecked = Object.values(checks).every(v => v);
+  document.getElementById('submit-btn').classList.toggle('enabled', allChecked);
+}
+
+function go() {
+  const nombre = document.getElementById('nombre').value.trim();
+  const email  = document.getElementById('email').value.trim();
+  const tel    = document.getElementById('tel').value.trim();
+
+  if (!nombre) {
+    document.getElementById('nombre').focus();
+    return;
+  }
+
+  const btn = document.getElementById('submit-btn');
+  btn.classList.add('loading');
+  btn.innerHTML = '<span>Registrando...</span>';
+
+  const uid = 'v_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+  const ts  = new Date().toISOString();
+
+  // 1. Enviar a Google Sheet via Apps Script (URL desde config.js)
+  const formData = new FormData();
+  formData.append('nombre',    nombre);
+  formData.append('email',     email);
+  formData.append('telefono',  '+569' + tel);
+  formData.append('ubicacion', PARQUE_CONFIG.ubicacion);
+  formData.append('locKey',    PARQUE_CONFIG.locKey);
+  formData.append('timestamp', ts);
+  formData.append('aceptado',  true);
+
+  if (APPS_SCRIPT_URL && !APPS_SCRIPT_URL.startsWith('TODO')) {
+    fetch(APPS_SCRIPT_URL, { method:'POST', body: formData, mode:'no-cors' })
+      .catch(() => {});
+  }
+
+  // 2. Guardar en sessionStorage
+  const visitante = { nombre, email, tel, uid, monitoreo: true, ts };
+  sessionStorage.setItem('collico_v', JSON.stringify(visitante));
+
+  // 3. Ir al mapa tras breve pausa
+  setTimeout(() => {
+    window.location.href = 'mapa.html';
+  }, 600);
+}
+</script>
+</body>
+</html>

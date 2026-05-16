@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Parque Collico · Bosque Abierto · Valdivia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
+  <script src="assets/config.js"></script>
+  <script src="assets/senderos.js"></script>
+  <style>
+    :root {
+      --bg:   #080C0A;
+      --teal: #3EC9A7;
+      --t2:   rgba(62,201,167,0.11);
+      --w:    #F5F9F7;
+      --m:    rgba(245,249,247,0.5);
+      --dim:  rgba(245,249,247,0.06);
+      --line: rgba(245,249,247,0.08);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--w); overflow-x:hidden; -webkit-font-smoothing:antialiased; }
+
+    .hero { min-height:100svh; position:relative; display:flex; flex-direction:column; justify-content:flex-end; padding:0 20px 52px; overflow:hidden; }
+    .hero-bg { position:absolute; inset:0; background:url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1000&q=85') center/cover no-repeat; z-index:0; }
+    .hero-bg::after { content:''; position:absolute; inset:0; background:linear-gradient(to bottom, rgba(8,12,10,0.1) 0%, rgba(8,12,10,0.45) 45%, rgba(8,12,10,0.95) 72%, var(--bg) 100%); }
+    .hero-nav { position:absolute; top:0; left:0; right:0; padding:20px; display:flex; align-items:center; justify-content:space-between; z-index:2; }
+    .nav-brand { display:flex; align-items:center; gap:8px; }
+    .nav-dot { width:7px; height:7px; border-radius:50%; background:var(--teal); }
+    .nav-name { font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+    .nav-pill { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--teal); background:var(--t2); border:1px solid rgba(62,201,167,0.2); padding:5px 12px; border-radius:20px; }
+
+    .hero-body { position:relative; z-index:2; }
+    .eyebrow { display:flex; align-items:center; gap:10px; font-size:10px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--teal); margin-bottom:16px; }
+    .eyebrow::before { content:''; display:block; width:22px; height:1px; background:var(--teal); }
+
+    h1 { font-size:clamp(46px,13vw,80px); font-weight:900; line-height:.92; letter-spacing:-2.5px; margin-bottom:18px; }
+    h1 em { font-style:normal; color:var(--teal); }
+    .hero-sub { font-size:15px; line-height:1.65; color:var(--m); max-width:320px; margin-bottom:36px; }
+    .btn-primary { display:inline-flex; align-items:center; gap:12px; background:var(--teal); color:#050A07; font-size:15px; font-weight:700; padding:16px 28px; border-radius:50px; text-decoration:none; -webkit-tap-highlight-color:transparent; transition:background .15s; }
+    .btn-primary:active { background:#5DD9BA; }
+
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+    .stat { padding:20px 10px; text-align:center; border-right:1px solid var(--line); }
+    .stat:last-child { border-right:none; }
+    .sv { font-size:22px; font-weight:900; line-height:1; letter-spacing:-0.5px; }
+    .su { font-size:11px; color:var(--teal); font-weight:600; }
+    .sl { font-size:9px; color:var(--m); margin-top:4px; }
+
+    .sec { padding:52px 20px; }
+    .divider { height:1px; background:var(--line); margin:0 20px; }
+    .kicker { display:flex; align-items:center; gap:8px; font-size:10px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--teal); margin-bottom:12px; }
+    .kicker::before { content:''; display:block; width:14px; height:1px; background:var(--teal); }
+    h2 { font-size:28px; font-weight:900; letter-spacing:-1px; line-height:1.12; margin-bottom:28px; }
+
+    .video-frame { position:relative; border-radius:16px; overflow:hidden; aspect-ratio:9/16; max-height:65vh; max-width:320px; margin:0 auto; border:1px solid var(--line); background:#000; }
+    .video-frame iframe { position:absolute; inset:0; width:100%; height:100%; border:none; }
+
+    .trail-list { display:flex; flex-direction:column; gap:8px; }
+    .trail { display:flex; align-items:center; gap:12px; padding:13px 14px; background:var(--dim); border:1px solid var(--line); border-left:3px solid; border-radius:12px; }
+    .t-em { font-size:18px; flex-shrink:0; }
+    .t-info { flex:1; min-width:0; }
+    .t-name { font-size:13px; font-weight:700; margin-bottom:4px; }
+    .t-meta { display:flex; flex-wrap:wrap; gap:6px; font-size:10px; color:var(--m); align-items:center; }
+    .badge { font-size:8px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; padding:2px 7px; border-radius:9px; }
+    .b-f  { background:rgba(143,188,143,.18); color:#8FBC8F; }
+    .b-md { background:rgba(62,201,167,.16);  color:var(--teal); }
+    .b-d  { background:rgba(245,158,11,.18);  color:#FBBF24; }
+    .b-vd { background:rgba(239,68,68,.18);   color:#F87171; }
+    .b-dh { background:rgba(220,38,38,.22);   color:#FCA5A5; }
+
+    .disc-pills { display:inline-flex; gap:3px; }
+    .disc-pill { font-size:8px; font-weight:700; padding:1px 5px; border-radius:6px; background:rgba(245,249,247,.07); color:var(--m); border:1px solid var(--line); }
+
+    .tech-list { display:flex; flex-direction:column; gap:18px; }
+    .tech-item { display:flex; gap:14px; align-items:flex-start; }
+    .tech-ic { width:40px; height:40px; flex-shrink:0; background:var(--t2); border:1px solid rgba(62,201,167,.18); border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+    .tech-txt h4 { font-size:14px; font-weight:700; margin-bottom:4px; }
+    .tech-txt p { font-size:13px; color:var(--m); line-height:1.55; }
+
+    .cta-block { padding:60px 20px 72px; text-align:center; }
+    .cta-block h2 { margin-bottom:12px; }
+    .cta-block p { font-size:14px; color:var(--m); line-height:1.65; margin-bottom:32px; max-width:300px; margin-left:auto; margin-right:auto; }
+    .btn-full { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; max-width:360px; margin:0 auto; background:var(--teal); color:#050A07; font-size:16px; font-weight:700; padding:18px; border-radius:50px; text-decoration:none; -webkit-tap-highlight-color:transparent; transition:background .15s; }
+    .btn-full:active { background:#5DD9BA; }
+
+    footer { padding:20px; text-align:center; font-size:10px; color:rgba(245,249,247,0.18); border-top:1px solid var(--line); line-height:2; }
+  </style>
+</head>
+<body>
+<script>if (sessionStorage.getItem('collico_v')) window.location.replace('mapa.html');</script>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <nav class="hero-nav">
+    <div class="nav-brand"><div class="nav-dot"></div><span class="nav-name">Parque Collico</span></div>
+    <div class="nav-pill">Bosque Abierto</div>
+  </nav>
+  <div class="hero-body">
+    <div class="eyebrow">ARAUCO Bosque Abierto · Valdivia</div>
+    <h1>El bosque<br/>te <em>espera.</em></h1>
+    <p class="hero-sub" id="hero-sub">Senderos en bosque nativo. GPS en vivo y notificaciones en terreno, sin instalar nada.</p>
+    <a href="registro.html" class="btn-primary">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      Entrar al Parque
+    </a>
+  </div>
+</section>
+
+<div class="stats" id="stats-bar"></div>
+
+<section class="sec">
+  <div class="kicker">El parque en acción</div>
+  <h2>Entra al bosque.<br/>Muévete.</h2>
+  <div class="video-frame">
+    <iframe src="https://www.youtube.com/embed/c5xJOw67IBs?rel=0&modestbranding=1&playsinline=1" title="Parque Collico" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="sec">
+  <div class="kicker">Senderos</div>
+  <h2 id="trails-title">Rutas en bosque nativo</h2>
+  <div class="trail-list" id="trail-list"></div>
+</section>
+
+<div class="divider"></div>
+
+<section class="sec">
+  <div class="kicker">Tecnología</div>
+  <h2>El parque en tu bolsillo</h2>
+  <div class="tech-list">
+    <div class="tech-item"><div class="tech-ic">📍</div><div class="tech-txt"><h4>GPS en tiempo real</h4><p>Tu posición exacta sobre los senderos. Sin app, desde cualquier teléfono.</p></div></div>
+    <div class="tech-item"><div class="tech-ic">🔔</div><div class="tech-txt"><h4>Notificaciones de voz</h4><p>El teléfono te avisa al entrar y salir de cada sendero. Manos libres.</p></div></div>
+    <div class="tech-item"><div class="tech-ic">📡</div><div class="tech-txt"><h4>Funciona sin señal</h4><p>El mapa del parque se descarga al entrar al Tótem. Úsalo aunque pierdas cobertura.</p></div></div>
+    <div class="tech-item"><div class="tech-ic">🗺️</div><div class="tech-txt"><h4>Planificador de ruta</h4><p>Elige tu destino y el mapa te muestra la ruta completa desde el Tótem de Acceso.</p></div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+<div class="cta-block">
+  <h2>¿Listo para entrar al <em style="font-style:normal;color:var(--teal)">bosque?</em></h2>
+  <p>Un registro rápido activa el GPS y desbloquea la experiencia completa en terreno.</p>
+  <a href="registro.html" class="btn-full">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    Registrarme y Entrar
+  </a>
+</div>
+
+<footer>Parque Collico · Valdivia · ARAUCO Bosque Abierto<br/>#AndarEsConservar</footer>
+
+<script>
+// =============================================================================
+// Renderizado dinámico desde senderos.js — la lista de senderos NUNCA se duplica
+// =============================================================================
+(function() {
+  // Stats
+  const totalKm   = SENDEROS.filter(s => s.id !== 'camino_principal')
+                            .reduce((a,s) => a + s.dist_km, 0).toFixed(1);
+  const totalSend = SENDEROS.filter(s => s.id !== 'camino_principal').length;
+  const dPlusMax  = Math.max(...SENDEROS.map(s => s.desnivel_pos));
+  const discs     = new Set(); SENDEROS.forEach(s => s.disciplinas.forEach(d => discs.add(d)));
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat"><div class="sv">${totalKm}<span class="su">km</span></div><div class="sl">Red total</div></div>
+    <div class="stat"><div class="sv">${totalSend}</div><div class="sl">Senderos</div></div>
+    <div class="stat"><div class="sv">${dPlusMax}<span class="su">m</span></div><div class="sl">D+ máximo</div></div>
+    <div class="stat"><div class="sv">${discs.size}</div><div class="sl">Disciplinas</div></div>
+  `;
+
+  document.getElementById('hero-sub').textContent =
+    `${totalKm} km de senderos en bosque nativo. GPS en vivo y notificaciones en terreno, sin instalar nada.`;
+
+  document.getElementById('trails-title').textContent =
+    `${totalSend} rutas en bosque nativo`;
+
+  // Lista de senderos
+  const badgeClass = (dif) => {
+    if (dif === 'Fácil')       return 'b-f';
+    if (dif === 'Moderado')    return 'b-md';
+    if (dif === 'Difícil')     return 'b-d';
+    if (dif === 'Muy Difícil') return 'b-vd';
+    return 'b-dh';
+  };
+  const fmtKm = (km) => km < 1 ? Math.round(km*1000) + ' m' : km.toFixed(2).replace(/\.?0+$/,'') + ' km';
+
+  const list = document.getElementById('trail-list');
+  // Ordenar: troncales + senderos por dificultad
+  const ordered = SENDEROS.filter(s => s.id !== 'camino_principal')
+    .sort((a,b) => a.dpkm - b.dpkm);
+
+  list.innerHTML = ordered.map(s => `
+    <div class="trail" style="border-left-color:${s.color}">
+      <span class="t-em">${s.emoji}</span>
+      <div class="t-info">
+        <div class="t-name">${s.nombre}</div>
+        <div class="t-meta">
+          <span>${fmtKm(s.dist_km)}</span>
+          <span>+${s.desnivel_pos}m D+</span>
+          <span class="badge ${badgeClass(s.dificultad)}">${s.dificultad}</span>
+          <span class="disc-pills">
+            ${s.disciplinas.map(d => `<span class="disc-pill">${d}</span>`).join('')}
+          </span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+})();
+</script>
+</body>
+</html>
