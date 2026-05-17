@@ -275,10 +275,12 @@
   <div class="rs-title" id="rs-title">—</div>
   <div class="rs-pasos" id="rs-pasos"></div>
   <div class="rs-stats">
-    <div class="rs-stat"><div class="rs-stat-l">Distancia total</div><div class="rs-stat-v" id="rs-dist">—</div></div>
-    <div class="rs-stat"><div class="rs-stat-l">Tiempo trek</div><div class="rs-stat-v" id="rs-trek">—</div></div>
-    <div class="rs-stat"><div class="rs-stat-l">Tiempo trail</div><div class="rs-stat-v" id="rs-trail">—</div></div>
+    <div class="rs-stat"><div class="rs-stat-l">Distancia</div><div class="rs-stat-v" id="rs-dist">—</div></div>
+    <div class="rs-stat"><div class="rs-stat-l">Desnivel +</div><div class="rs-stat-v" id="rs-dpos">—</div></div>
+    <div class="rs-stat"><div class="rs-stat-l">Dificultad</div><div class="rs-stat-v" id="rs-dif">—</div></div>
   </div>
+  <!-- Tiempos por disciplina (se rellena dinámicamente) -->
+  <div id="rs-times" style="margin-top:10px"></div>
 </div>
 
 <!-- SENDERO PANEL -->
@@ -291,10 +293,12 @@
   <div class="panel-desc" id="p-desc">—</div>
   <div class="panel-stats">
     <div class="pst"><div class="pst-l">Distancia</div><div class="pst-v" id="p-dist">—</div></div>
-    <div class="pst"><div class="pst-l">Tiempo</div><div class="pst-v" id="p-time">—</div><div class="pst-h" id="p-time-h"></div></div>
     <div class="pst"><div class="pst-l">Desnivel +</div><div class="pst-v" id="p-elev">—</div></div>
     <div class="pst"><div class="pst-l">Dificultad</div><div class="pst-v" id="p-dif">—</div></div>
+    <div class="pst"><div class="pst-l">D+/km</div><div class="pst-v" id="p-dpkm">—</div></div>
   </div>
+  <!-- Tiempos por disciplina (se rellena dinámicamente) -->
+  <div id="p-times" style="margin-top:10px"></div>
 </div>
 
 <!-- NOTIFICATION -->
@@ -524,24 +528,24 @@ function setDisc(disc, btn) {
 
 
 // =============================================================================
-// PLANIFICADOR — lista construida desde RUTAS
+// PLANIFICADOR — lista construida desde DESTINOS (rutas óptimas por destino)
 // =============================================================================
 function buildPlanList() {
   const list = document.getElementById('plan-list');
-  const keys = Object.keys(RUTAS);
+  const keys = Object.keys(DESTINOS);
   if (!keys.length) {
-    list.innerHTML = '<div class="plan-empty">Sin rutas configuradas aún</div>';
+    list.innerHTML = '<div class="plan-empty">Sin destinos configurados aún</div>';
     return;
   }
   // Ordenar por distancia total ascendente
-  const ordered = keys.map(k => ({k, r: RUTAS[k]}))
-                     .sort((a,b) => (a.r.dist_total_km||0) - (b.r.dist_total_km||0));
-  list.innerHTML = ordered.map(({k,r}) => `
+  const ordered = keys.map(k => ({k, d: DESTINOS[k]}))
+                     .sort((a,b) => (a.d.dist_total_km||0) - (b.d.dist_total_km||0));
+  list.innerHTML = ordered.map(({k,d}) => `
     <div class="plan-dest" data-ruta="${k}" onclick="selectRuta('${k}',this)">
-      <span class="plan-dest-em">${r.emoji||'🥾'}</span>
+      <span class="plan-dest-em">${d.emoji||'🎯'}</span>
       <div class="plan-dest-info">
-        <div class="plan-dest-name">${r.nombre}</div>
-        <div class="plan-dest-dist">${(r.dist_total_km||0).toFixed(2)} km desde Tótem</div>
+        <div class="plan-dest-name">${d.nombre}</div>
+        <div class="plan-dest-dist">${(d.dist_total_km||0).toFixed(2)} km · +${d.desnivel_pos}m D+</div>
       </div>
     </div>
   `).join('');
@@ -581,10 +585,10 @@ function initRutaLayer() {
   });
 }
 
-function renderRuta(rutaId) {
-  const ruta = RUTAS[rutaId];
-  if (!ruta) return;
-  const geojson = buildRutaGeoJSON(rutaId);
+function renderRuta(destinoId) {
+  const dest = DESTINOS[destinoId];
+  if (!dest) return;
+  const geojson = buildDestinoGeoJSON(destinoId);
   map.getSource('ruta-activa').setData(geojson);
 
   // Atenuar otros senderos
@@ -595,18 +599,68 @@ function renderRuta(rutaId) {
   if (map.getLayer('ripio'))      map.setPaintProperty('ripio','line-opacity',0.2);
   if (map.getLayer('ripio-glow')) map.setPaintProperty('ripio-glow','line-opacity',0.05);
 
-  document.getElementById('rs-title').textContent = (ruta.emoji||'') + ' ' + ruta.nombre;
-  document.getElementById('rs-dist').textContent  = (ruta.dist_total_km||0).toFixed(2) + ' km';
-  document.getElementById('rs-trek').textContent  = ruta.tiempo_trek  || '—';
-  document.getElementById('rs-trail').textContent = ruta.tiempo_trail || '—';
+  // Calcular distancia total y total tramos
+  document.getElementById('rs-title').textContent = (dest.emoji||'') + ' ' + dest.nombre;
+  document.getElementById('rs-dist').textContent  = dest.dist_total_km.toFixed(2) + ' km';
+  document.getElementById('rs-dpos').textContent  = '+' + dest.desnivel_pos + 'm';
+  document.getElementById('rs-dif').textContent   = dest.dificultad || '—';
+  
+  // Tiempos por disciplina (solo en destinos planificados)
+  const timesEl = document.getElementById('rs-times');
+  timesEl.innerHTML = '';
+  const filas = [];
+  if (dest.tiempo_trek)  filas.push({ ic: '🥾',  lbl: 'Trekking',     val: dest.tiempo_trek,  sub: '4 km/h' });
+  if (dest.tiempo_trail) filas.push({ ic: '🏃',  lbl: 'Trail running', val: dest.tiempo_trail, sub: '8 km/h' });
+  if (dest.tiempo_xc)    filas.push({ ic: '🚵', lbl: 'XC MTB',        val: dest.tiempo_xc,    sub: '12 km/h' });
+  
+  if (filas.length) {
+    const hdr = document.createElement('div');
+    hdr.style.cssText = 'font-size:9px;font-weight:600;color:rgba(245,249,247,.5);text-transform:uppercase;letter-spacing:1px;margin:4px 0 6px;';
+    hdr.textContent = 'Tiempos estimados';
+    timesEl.appendChild(hdr);
+    
+    filas.forEach(f => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(245,249,247,.04);border-radius:8px;margin-bottom:4px;';
+      row.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:14px">${f.ic}</span>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:var(--w)">${f.lbl}</div>
+            <div style="font-size:10px;color:var(--m)">${f.sub}</div>
+          </div>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:var(--teal)">${f.val}</div>
+      `;
+      timesEl.appendChild(row);
+    });
+  }
 
   const pasosEl = document.getElementById('rs-pasos');
   pasosEl.innerHTML = '';
-  ruta.pasos.forEach(paso => {
+  
+  // Si pasa_por tiene contenidos, mostrar arriba como nota
+  if (dest.pasa_por && dest.pasa_por.length) {
+    const nota = document.createElement('div');
+    nota.style.cssText = 'font-size:11px;color:rgba(245,249,247,0.6);padding:6px 10px;margin-bottom:8px;background:rgba(255,184,3,0.08);border-left:2px solid #F5C242;border-radius:6px;';
+    nota.innerHTML = '📍 Pasa por: <strong>' + dest.pasa_por.join(', ') + '</strong>';
+    pasosEl.appendChild(nota);
+  }
+  
+  // Descripción del destino
+  if (dest.descripcion) {
+    const desc = document.createElement('div');
+    desc.style.cssText = 'font-size:11px;color:rgba(245,249,247,0.55);padding:0 4px 10px;line-height:1.45;';
+    desc.textContent = dest.descripcion;
+    pasosEl.appendChild(desc);
+  }
+  
+  // Pasos en orden
+  dest.pasos.forEach((paso, i) => {
     const div = document.createElement('div');
     div.className = 'rs-paso';
     div.style.borderLeftColor = paso.color;
-    div.innerHTML = '<span class="rs-paso-label">' + paso.label + '</span>';
+    div.innerHTML = '<span style="opacity:.5;font-size:11px;margin-right:6px">' + (i+1) + '.</span><span class="rs-paso-label">' + paso.label + '</span>';
     pasosEl.appendChild(div);
   });
 
@@ -616,7 +670,7 @@ function renderRuta(rutaId) {
   if (geojson.features.length > 0) {
     const allCoords = geojson.features.flatMap(f => f.geometry.coordinates);
     const bounds = allCoords.reduce((b,c) => b.extend(c), new maplibregl.LngLatBounds(allCoords[0], allCoords[0]));
-    map.fitBounds(bounds, { padding:{ top:140, bottom:240, left:20, right:20 }, duration:700 });
+    map.fitBounds(bounds, { padding:{ top:140, bottom:280, left:20, right:20 }, duration:700 });
   }
 }
 
@@ -653,14 +707,10 @@ function openPanel(id) {
   document.getElementById('p-dist').textContent = s.dist_km >= 1 ? s.dist_km+' km' : Math.round(s.dist_km*1000)+' m';
   document.getElementById('p-elev').textContent = '+'+s.desnivel_pos+'m';
   document.getElementById('p-dif').textContent  = s.dificultad;
+  document.getElementById('p-dpkm').textContent = s.dpkm + ' m/km';
 
-  // Tiempo según disciplina seleccionada
-  let tiempo = s.tiempo_trek || s.tiempo_trail || '—';
-  let tiempoLabel = 'Trekking';
-  if (S.disc === 'TR' && s.tiempo_trail) { tiempo = s.tiempo_trail; tiempoLabel = 'Trail running'; }
-  else if (S.disc === 'XC' && s.tiempo_xc) { tiempo = s.tiempo_xc; tiempoLabel = 'XC MTB'; }
-  document.getElementById('p-time').textContent   = tiempo;
-  document.getElementById('p-time-h').textContent = tiempoLabel;
+  // Limpiar bloque de tiempos (se decidió quitarlos para senderos bidireccionales)
+  document.getElementById('p-times').innerHTML = '';
 
   // Tags: dificultad + disciplinas
   const tags = document.getElementById('p-tags');
@@ -834,7 +884,8 @@ function initFromURL() {
     if (btn) setDisc(disc.toUpperCase(), btn);
   }
   if (trail) setTimeout(() => openPanel(trail), 700);
-  if (ruta && RUTAS[ruta]) setTimeout(() => renderRuta(ruta), 700);
+  const destino = p.get('destino') || ruta;  // backward compat
+  if (destino && DESTINOS[destino]) setTimeout(() => renderRuta(destino), 700);
 }
 
 

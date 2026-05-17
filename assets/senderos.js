@@ -18,7 +18,6 @@
 //   sentido              ← 'bajada' / 'subida' / null
 //   dist_km, desnivel_pos, desnivel_neg, elevacion_min/max/avg
 //   pendiente_avg_up/dn, pendiente_max_up/dn, dpkm (D+/km · ITRA)
-//   tiempo_trek / tiempo_trail / tiempo_xc (estimados Naismith)
 //   descripcion
 //   geofence: { inicio: {lng,lat,radio}, fin: {lng,lat,radio} }
 //   coords[][]           ← [lng,lat] del trazado real (KMZ Valdivia Trail)
@@ -52,9 +51,6 @@ const SENDEROS = [
     pendiente_max_up: 8.0,
     pendiente_max_dn: -12.0,
     dpkm:           9.3,
-    tiempo_trek:  "1h 44-2h 21",
-    tiempo_trail: "0h 53-1h 12",
-    tiempo_xc:    "37-50 min",
 
     geofence: {
       inicio: { lng: -73.2028504, lat: -39.8188634, radio: 80 },
@@ -145,9 +141,6 @@ const SENDEROS = [
     pendiente_max_dn: -29.1,
     dpkm:           57.1,
     tiene_subsegmentos: true,
-    tiempo_trek:  "1h 26-57",
-    tiempo_trail: "0h 49-1h 06",
-    tiempo_xc:    "38-52 min",
 
     geofence: {
       inicio: { lng: -73.1844400, lat: -39.8169183, radio: 50 },
@@ -241,9 +234,6 @@ const SENDEROS = [
     pendiente_max_up: 23.9,
     pendiente_max_dn: -28.7,
     dpkm:           54.2,
-    tiempo_trek:  "1h 28-59",
-    tiempo_trail: "0h 50-1h 07",
-    tiempo_xc:    "39-53 min",
 
     geofence: {
       inicio: { lng: -73.1826421, lat: -39.8281953, radio: 50 },
@@ -312,8 +302,6 @@ const SENDEROS = [
     pendiente_max_up: 32.0,
     pendiente_max_dn: -22.5,
     dpkm:           99.1,
-    tiempo_trek:  "14-19 min",
-    tiempo_trail: "8-11 min",
 
     geofence: {
       inicio: { lng: -73.2033963, lat: -39.8189027, radio: 50 },
@@ -379,8 +367,6 @@ const SENDEROS = [
     pendiente_max_up: 39.8,
     pendiente_max_dn: -32.3,
     dpkm:           103.4,
-    tiempo_trek:  "12-16 min",
-    tiempo_trail: "7-9 min",
 
     geofence: {
       inicio: { lng: -73.1821443, lat: -39.8215840, radio: 50 },
@@ -462,9 +448,6 @@ const SENDEROS = [
     pendiente_max_up: 31.3,
     pendiente_max_dn: -18.2,
     dpkm:           93.7,
-    tiempo_trek:  "21-29 min",
-    tiempo_trail: "12-17 min",
-    tiempo_xc:    "10-14 min",
 
     geofence: {
       inicio: { lng: -73.1966461, lat: -39.8201206, radio: 50 },
@@ -520,8 +503,6 @@ const SENDEROS = [
     pendiente_max_up: 25.7,
     pendiente_max_dn: -13.5,
     dpkm:           101.9,
-    tiempo_trek:  "34-46 min",
-    tiempo_trail: "20-27 min",
 
     geofence: {
       inicio: { lng: -73.1978813, lat: -39.8184867, radio: 50 },
@@ -629,9 +610,6 @@ const SENDEROS = [
     pendiente_max_up: 20.0,
     pendiente_max_dn: -25.0,
     dpkm:           69.1,
-    tiempo_trek:  "25-33 min",
-    tiempo_trail: "14-19 min",
-    tiempo_xc:    "11-15 min",
 
     geofence: {
       inicio: { lng: -73.1884264, lat: -39.8177136, radio: 50 },
@@ -687,9 +665,6 @@ const SENDEROS = [
     pendiente_max_up: 20.0,
     pendiente_max_dn: -15.0,
     dpkm:           84.5,
-    tiempo_trek:  "13-18 min",
-    tiempo_trail: "7-10 min",
-    tiempo_xc:    "6-8 min",
 
     geofence: {
       inicio: { lng: -73.1902177, lat: -39.8234005, radio: 50 },
@@ -737,7 +712,6 @@ const SENDEROS = [
     pendiente_max_up: 0.0,
     pendiente_max_dn: -25.0,
     dpkm:           7.9,
-    tiempo_xc:    "8-12 min",
 
     geofence: {
       inicio: { lng: -73.1765111, lat: -39.8383131, radio: 50 },
@@ -795,9 +769,6 @@ const SENDEROS = [
     pendiente_max_up: 0.0,
     pendiente_max_dn: -15.0,
     dpkm:           0.0,
-    tiempo_trek:  "8-10 min",
-    tiempo_trail: "4-5 min",
-    tiempo_xc:    "2-3 min",
 
     geofence: {
       inicio: { lng: -73.1753659, lat: -39.8271760, radio: 50 },
@@ -888,9 +859,6 @@ const SENDEROS = [
     pendiente_max_up: 18.0,
     pendiente_max_dn: -20.0,
     dpkm:           54.3,
-    tiempo_trek:  "11-15 min",
-    tiempo_trail: "6-8 min",
-    tiempo_xc:    "5-6 min",
 
     geofence: {
       inicio: { lng: -73.2026280, lat: -39.8177258, radio: 50 },
@@ -967,60 +935,93 @@ const POIS = [
 ];
 
 // =============================================================================
-// RUTAS — Planificador desde el Tótem de Acceso
-// ⚠️ TODO: definir conexiones reales al Tótem para los senderos nuevos:
-//   spot_23, lalo_cura, suaveton, conejo, androides, budicali, los_helechos, el_muro
+// DESTINOS — Planificador por destinos (POIs) con rutas óptimas
+//
+// Cada destino tiene una secuencia de "pasos" que componen la ruta desde
+// el Tótem hasta el destino. Tipos de paso:
+//   tipo:'ripio_hasta'   → Camino Principal de Ripio desde idx 0 hasta hasta_idx
+//   tipo:'sendero'       → sendero completo (id)
+//   tipo:'sendero_hasta' → sendero desde inicio hasta hasta_idx
 // =============================================================================
 
 const BIFURCACION_COLLICO1_CASCADA_IDX = 123;
 
-const RUTAS = {
-
-  vietnam: {
-    id: 'vietnam', nombre: 'Vietnam', emoji: '🏃',
-    dist_total_km: 0.67,
+const DESTINOS = {
+  cumbre: {
+    id: 'cumbre',
+    nombre: "Cumbre",
+    emoji: "🏔️",
+    descripcion: "Punto más alto del parque · 327m s.n.m. Vista 360° del valle.",
+    dist_total_km: 6.98,
+    desnivel_pos: 444,
+    dpkm: 63.6,
+    dificultad: "Moderado",
+    tiempo_trek:  "2h 06 – 2h 51",
+    tiempo_trail: "1h 12 – 1h 38",
+    tiempo_xc:    "0h 57 – 1h 18",
+    pasa_por: ["Sanguijuela", "Chela Track", "Los Pinos"],
     pasos: [
-      { tipo: 'sendero', id: 'vietnam', label: 'Vietnam', color: '#FB8500' }
-    ]
-  },
-
-  cascada: {
-    id: 'cascada', nombre: 'La Cascada', emoji: '💧',
-    dist_total_km: 8.28,
-    pasos: [
-      { tipo: 'ripio',  label: 'Ripio de acceso', color: '#F5C242' },
-      { tipo: 'acceso', id: 'collico1', hasta_idx: BIFURCACION_COLLICO1_CASCADA_IDX, label: 'Collico 1 (acceso)', color: '#74C69D' },
-      { tipo: 'sendero', id: 'cascada',  label: 'La Cascada', color: '#EF4444' }
-    ]
-  },
-
-  collico1: {
-    id: 'collico1', nombre: 'Collico 1 (troncal completo)', emoji: '🌿',
-    dist_total_km: 12.64,
-    pasos: [
-      { tipo: 'ripio',   label: 'Ripio de acceso', color: '#F5C242' },
-      { tipo: 'sendero', id: 'collico1', label: 'Collico 1', color: '#74C69D' }
-    ]
-  },
-
-  mirador_puma: {
-    id: 'mirador_puma', nombre: 'Mirador del Puma', emoji: '🐆',
-    dist_total_km: 12.81,
-    pasos: [
-      { tipo: 'ripio',   label: 'Ripio de acceso', color: '#F5C242' },
-      { tipo: 'sendero', id: 'mirador_puma', label: 'Mirador del Puma', color: '#40916C' }
+      { tipo: 'ripio_hasta', hasta_idx: 29, label: "Ripio hasta El Muro (0.46 km)", color: '#F5C242' },
+      { tipo: 'sendero', id: 'el_muro', label: "El Muro (1.60 km · +163m)", color: '#8338EC' },
+      { tipo: 'sendero', id: 'collico1', label: "Collico 1 hasta Cumbre (4.92 km)", color: '#74C69D' }
     ]
   },
 
   mirador_kunstmann: {
-    id: 'mirador_kunstmann', nombre: 'Mirador Kunstmann', emoji: '🔭',
-    dist_total_km: 8.66,
+    id: 'mirador_kunstmann',
+    nombre: "Mirador Kunstmann",
+    emoji: "🔭",
+    descripcion: "Mirador con vista al valle del Calle-Calle y Valdivia. Familiar.",
+    dist_total_km: 1.72,
+    desnivel_pos: 98,
+    dpkm: 57.0,
+    dificultad: "Moderado",
+    tiempo_trek:  "30 – 40 min",
+    tiempo_trail: "17 – 23 min",
+    pasa_por: [],
     pasos: [
-      { tipo: 'ripio',   label: 'Ripio de acceso', color: '#F5C242' },
-      { tipo: 'sendero', id: 'mirador_kunstmann', label: 'Mirador Kunstmann', color: '#4CC9F0' }
+      { tipo: 'ripio_hasta', hasta_idx: 41, label: "Ripio hasta bifurcación (0.68 km)", color: '#F5C242' },
+      { tipo: 'sendero', id: 'mirador_kunstmann', label: "Mirador Kunstmann (1.04 km · +98m)", color: '#4CC9F0' }
     ]
   },
 
+  mirador_del_puma: {
+    id: 'mirador_del_puma',
+    nombre: "Mirador del Puma",
+    emoji: "🐆",
+    descripcion: "Mirador con vista al valle Calle-Calle y los Andes al este. Familiar.",
+    dist_total_km: 7.47,
+    desnivel_pos: 276,
+    dpkm: 36.9,
+    dificultad: "Moderado",
+    tiempo_trek:  "1h 58 – 2h 40",
+    tiempo_trail: "1h 05 – 1h 28",
+    pasa_por: [],
+    pasos: [
+      { tipo: 'ripio_hasta', hasta_idx: 133, label: "Ripio hasta bifurcación (2.38 km)", color: '#F5C242' },
+      { tipo: 'sendero', id: 'mirador_puma', label: "Mirador del Puma (5.09 km · +276m)", color: '#40916C' }
+    ]
+  },
+
+  cascada: {
+    id: 'cascada',
+    nombre: "La Cascada",
+    emoji: "💧",
+    descripcion: "Cascada del parque. Acceso técnico desde Collico 1.",
+    dist_total_km: 3.33,
+    desnivel_pos: 251,
+    dpkm: 75.4,
+    dificultad: "Moderado",
+    tiempo_trek:  "1h 03 – 1h 26",
+    tiempo_trail: "37 – 50 min",
+    pasa_por: [],
+    pasos: [
+      { tipo: 'ripio_hasta', hasta_idx: 29, label: "Ripio hasta El Muro (0.46 km)", color: '#F5C242' },
+      { tipo: 'sendero', id: 'el_muro', label: "El Muro (1.60 km · +163m)", color: '#8338EC' },
+      { tipo: 'sendero_hasta', id: 'collico1', hasta_idx: 123, label: "Collico 1 hasta bifurcación Cascada (0.71 km)", color: '#74C69D' },
+      { tipo: 'sendero', id: 'cascada', label: "Cascada (0.56 km · +58m)", color: '#EF4444' }
+    ]
+  }
 };
 
 
@@ -1073,19 +1074,22 @@ function getCoordsHastaIdx(senderoId, idx) {
   return s.coords.slice(0, idx + 1);
 }
 
-function buildRutaGeoJSON(rutaId) {
-  const ruta = RUTAS[rutaId];
-  if (!ruta) return null;
+function buildDestinoGeoJSON(destinoId) {
+  const dest = DESTINOS[destinoId];
+  if (!dest) return null;
   const features = [];
-  ruta.pasos.forEach((paso, i) => {
+  const ripioCoords = RIPIO_ACCESO;
+  
+  dest.pasos.forEach((paso, i) => {
     let coords = [];
-    if (paso.tipo === 'ripio') {
-      coords = RIPIO_ACCESO;
+    if (paso.tipo === 'ripio_hasta') {
+      coords = ripioCoords.slice(0, paso.hasta_idx + 1);
     } else if (paso.tipo === 'sendero') {
       const s = getSenderoById(paso.id);
       if (s) coords = s.coords;
-    } else if (paso.tipo === 'acceso') {
-      coords = getCoordsHastaIdx(paso.id, paso.hasta_idx);
+    } else if (paso.tipo === 'sendero_hasta') {
+      const s = getSenderoById(paso.id);
+      if (s) coords = s.coords.slice(0, paso.hasta_idx + 1);
     }
     if (coords.length > 1) {
       features.push({
@@ -1097,6 +1101,11 @@ function buildRutaGeoJSON(rutaId) {
   });
   return { type: 'FeatureCollection', features };
 }
+
+function getDestinoById(id) { return DESTINOS[id] || null; }
+
+// Backwards compat: si alguien usa buildRutaGeoJSON, mantener
+function buildRutaGeoJSON(rutaId) { return buildDestinoGeoJSON(rutaId); }
 
 function categoriaDificultad(dpkm) {
   if (dpkm <  30) return 'Fácil';
@@ -1112,7 +1121,8 @@ window.SENDEROS = SENDEROS;
 window.SUBSEGMENTOS = SUBSEGMENTOS;
 window.RIPIO_ACCESO = RIPIO_ACCESO;
 window.POIS = POIS;
-window.RUTAS = RUTAS;
+window.DESTINOS = DESTINOS;
+window.RUTAS = DESTINOS;  // alias backward-compat
 window.BIFURCACION_COLLICO1_CASCADA_IDX = BIFURCACION_COLLICO1_CASCADA_IDX;
 window.haversine = haversine;
 window.checkProximity = checkProximity;
@@ -1122,4 +1132,6 @@ window.getSubsegmentos = getSubsegmentos;
 window.getSubsegmentoCoords = getSubsegmentoCoords;
 window.getCoordsHastaIdx = getCoordsHastaIdx;
 window.buildRutaGeoJSON = buildRutaGeoJSON;
+window.buildDestinoGeoJSON = buildDestinoGeoJSON;
+window.getDestinoById = getDestinoById;
 window.categoriaDificultad = categoriaDificultad;
