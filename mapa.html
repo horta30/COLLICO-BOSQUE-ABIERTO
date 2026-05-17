@@ -482,58 +482,37 @@ function loadPOIs() {
 }
 
 // =============================================================================
-// AREAS CRÍTICAS — polígonos de orientación (Pata de Gallo, etc.)
+// AREAS CRÍTICAS — POI de cruce/orientación (detección GPS interna)
 // =============================================================================
 function loadAreasCriticas() {
   if (typeof AREAS_CRITICAS === 'undefined' || !AREAS_CRITICAS.length) return;
   
   AREAS_CRITICAS.forEach(area => {
-    // Polígono con relleno semi-transparente + borde
-    const polyCoords = area.poligono.slice();
-    polyCoords.push(polyCoords[0]); // cerrar el polígono
-    
-    map.addSource('area-' + area.id, {
-      type: 'geojson',
-      data: {
-        type: 'Feature',
-        properties: { id: area.id, nombre: area.nombre },
-        geometry: { type: 'Polygon', coordinates: [polyCoords] }
-      }
-    });
-    
-    map.addLayer({
-      id: 'area-fill-' + area.id,
-      type: 'fill',
-      source: 'area-' + area.id,
-      paint: { 'fill-color': area.color, 'fill-opacity': 0.22 }
-    });
-    
-    map.addLayer({
-      id: 'area-line-' + area.id,
-      type: 'line',
-      source: 'area-' + area.id,
-      paint: { 'line-color': area.color, 'line-width': 2.5, 'line-dasharray': [2, 1] }
-    });
-    
-    // Marker central con emoji
+    // Marker discreto tipo POI de cruce (sin polígono, sin emoji grande)
     const wrap = document.createElement('div');
     wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:transform .15s;';
+    
+    // Icono pequeño tipo "cruce" — círculo con +
     const ic = document.createElement('div');
-    ic.style.cssText = 'font-size:34px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.9));line-height:1;';
-    ic.textContent = area.emoji;
+    ic.style.cssText = `
+      width:24px;height:24px;border-radius:50%;
+      background:${area.color};
+      border:2px solid #fff;
+      box-shadow:0 2px 6px rgba(0,0,0,.6);
+      display:flex;align-items:center;justify-content:center;
+      color:#fff;font-weight:900;font-size:14px;line-height:1;
+    `;
+    ic.textContent = '+';
+    
     const lbl = document.createElement('div');
-    lbl.style.cssText = `font-family:Inter,sans-serif;font-size:11px;font-weight:800;color:#fff;background:${area.color};padding:3px 9px;border-radius:8px;white-space:nowrap;letter-spacing:.3px;box-shadow:0 2px 8px rgba(0,0,0,.5);`;
+    lbl.style.cssText = `font-family:Inter,sans-serif;font-size:10px;font-weight:700;color:#fff;background:rgba(8,12,10,0.75);backdrop-filter:blur(4px);padding:2px 7px;border-radius:6px;white-space:nowrap;letter-spacing:.3px;border:1px solid rgba(255,255,255,.12);`;
     lbl.textContent = area.nombre;
+    
     wrap.appendChild(ic);
     wrap.appendChild(lbl);
     wrap.addEventListener('click', () => openAreaPanel(area.id));
     
     new maplibregl.Marker({ element: wrap, anchor: 'top' }).setLngLat(area.centro).addTo(map);
-    
-    // Click en el polígono también abre el panel
-    map.on('click', 'area-fill-' + area.id, () => openAreaPanel(area.id));
-    map.on('mouseenter', 'area-fill-' + area.id, () => map.getCanvas().style.cursor = 'pointer');
-    map.on('mouseleave', 'area-fill-' + area.id, () => map.getCanvas().style.cursor = '');
   });
 }
 
