@@ -1,7 +1,12 @@
 // =============================================================================
-// COLLICO BOSQUE ABIERTO — senderos.js v2.2
+// COLLICO BOSQUE ABIERTO — senderos.js v2.3
 // FUENTE ÚNICA DE VERDAD · 15 senderos + 3 sub-segmentos · Métricas reales
 // 
+// v2.3 (May 2026):
+//   • Pata de Gallo: descripción con km al acceso principal (4.37 km ruta A / 4.75 km ruta B)
+//   • UI: "Tótem" → "Acceso principal" en todas las strings visibles al usuario
+//   • El Muro: descripción "cerca del Tótem" → "cerca del acceso principal"
+//
 // v2.2 (May 2026):
 //   • La Cascada: descripción actualizada con info de terreno (riachuelo, quilas, piedras resbalosas)
 //   • Nueva AREA_CRITICA "bifurcacion_cascada" con TTS de advertencia (mano derecha = cascada)
@@ -291,7 +296,7 @@ const SENDEROS = [
     color: '#FB8500',
     disciplinas: ['TR'],
     dificultad: "Muy Difícil",
-    descripcion: "Sendero corto pero exigente. Arranca cerca del Tótem y sube directo por el bosque. Pendiente máxima +32% — de las secciones más empinadas del parque.",
+    descripcion: "Sendero corto pero exigente. Arranca cerca del acceso principal y sube directo por el bosque. Pendiente máxima +32% — de las secciones más empinadas del parque.",
 
     // Direccionalidad
     unidireccional: false,
@@ -1181,24 +1186,24 @@ const AREAS_CRITICAS = [
     nombre: 'Pata de Gallo',
     emoji: '🐔',
     tipo: 'cruce',
-    descripcion: 'Cruce principal del parque · punto de orientación y retorno al Tótem. Aquí se intersectan el Camino Principal de Ripio, Collico 1 y el inicio de Sanguijuela.',
+    descripcion: 'Cruce principal del parque · punto de orientación y retorno al acceso principal. Aquí se intersectan el Camino Principal de Ripio, Collico 1 y el inicio de Sanguijuela. Desde acá estás a 4.37 km del acceso principal por la ruta más corta.',
     intersecta: ['camino_principal', 'collico1', 'sanguijuela'],
     centro: [-73.1673788, -39.8306065],
     poligono: [[-73.1669485,-39.8301923], [-73.1672288,-39.8301969], [-73.1681884,-39.8300902], [-73.1676078,-39.8304125], [-73.1674062,-39.8306381], [-73.1677087,-39.8311087], [-73.1678232,-39.8313951], [-73.1672751,-39.8310835], [-73.1666532,-39.8307553], [-73.1669485,-39.8301923]],
     color: '#FF6B35',
-    mensaje_tts: 'Estás en la Pata de Gallo. Para regresar al acceso principal tienes dos rutas: por el Camino Principal de Ripio hacia el oeste, o por Collico 1 y Conejo conectando al Ripio Principal.',
+    mensaje_tts: 'Estás en la Pata de Gallo. Para volver al acceso principal tienes dos opciones: por el Camino Principal de Ripio hacia el oeste, 4 kilómetros 370 metros, la más simple; o por Collico 1 y Conejo, 4 kilómetros 750 metros, por el norte del parque.',
     opciones: [
       {
         emoji: '🛣️',
-        titulo: 'Ruta A · directa',
-        texto: 'Camino Principal de Ripio → Tótem',
-        detalle: 'La ruta más simple. Sigue el ripio hacia el oeste hasta llegar al Tótem.'
+        titulo: 'Ruta A · directa · 4.37 km',
+        texto: 'Camino Principal de Ripio → Acceso principal',
+        detalle: 'La ruta más simple y corta. Sigue el ripio hacia el oeste, 4.37 km hasta el acceso principal.'
       },
       {
         emoji: '🌿',
-        titulo: 'Ruta B · norte',
+        titulo: 'Ruta B · norte · 4.75 km',
         texto: 'Collico 1 → Conejo → Camino Principal de Ripio → Acceso principal',
-        detalle: 'Por el norte del parque. Toma Collico 1, baja por Conejo hasta el Camino Principal de Ripio, y sigue el ripio al oeste hasta el acceso principal (Tótem).'
+        detalle: 'Por el norte del parque, 4.75 km en total. Toma Collico 1, baja por Conejo hasta el Camino Principal de Ripio, y sigue el ripio al oeste hasta el acceso principal.'
       }
     ]
   },

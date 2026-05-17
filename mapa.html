@@ -442,7 +442,7 @@ function loadTotem() {
   const el = document.createElement('div');
   el.textContent = '🗺️';
   el.style.cssText = 'font-size:24px;cursor:pointer;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));';
-  el.addEventListener('click', () => showNotif('🗺️','Tótem de Acceso','Punto de partida · Planifica tu ruta desde aquí','#3EC9A7'));
+  el.addEventListener('click', () => showNotif('🗺️','Acceso principal','Punto de partida · Planifica tu ruta desde aquí','#3EC9A7'));
   new maplibregl.Marker({ element:el, anchor:'center' })
     .setLngLat([PARQUE_CONFIG.totem.lng, PARQUE_CONFIG.totem.lat]).addTo(map);
 }
@@ -545,7 +545,7 @@ function openAreaPanel(id) {
   timesEl.innerHTML = '';
   const hdr = document.createElement('div');
   hdr.style.cssText = 'font-size:9px;font-weight:600;color:rgba(245,249,247,.5);text-transform:uppercase;letter-spacing:1px;margin:4px 0 6px;';
-  hdr.textContent = 'Rutas de evacuación al Tótem';
+  hdr.textContent = 'Rutas de evacuación al acceso principal';
   timesEl.appendChild(hdr);
   
   area.opciones.forEach(op => {

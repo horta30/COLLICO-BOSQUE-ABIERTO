@@ -98,7 +98,7 @@ COLLICO-BOSQUE-ABIERTO/
 
 ## 🎯 Destinos planificados (4)
 
-Rutas óptimas desde el Tótem de Acceso hasta cada destino, con tiempos estimados (fórmula Naismith).
+Rutas óptimas desde el acceso principal hasta cada destino, con tiempos estimados (fórmula Naismith).
 
 | Destino | Distancia | Desnivel + | Dificultad | Trek | Trail | XC |
 |---|---|---|---|---|---|---|
@@ -119,7 +119,7 @@ Cruce principal del parque donde se intersectan **Camino Principal de Ripio + Co
 - **Vibración fuerte** (5 pulsos)
 - **Toast warning** durante 8 segundos
 - **Panel con 2 rutas de retorno** al acceso principal:
-  - **Ruta A · directa**: Camino Principal de Ripio → Tótem
+  - **Ruta A · directa**: Camino Principal de Ripio → Acceso principal
   - **Ruta B · norte**: Collico 1 → Conejo → Camino Principal de Ripio → Acceso principal
 
 ---
