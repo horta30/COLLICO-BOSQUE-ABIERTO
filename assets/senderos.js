@@ -1,7 +1,11 @@
 // =============================================================================
-// COLLICO BOSQUE ABIERTO — senderos.js v2.1
+// COLLICO BOSQUE ABIERTO — senderos.js v2.2
 // FUENTE ÚNICA DE VERDAD · 15 senderos + 3 sub-segmentos · Métricas reales
 // 
+// v2.2 (May 2026):
+//   • La Cascada: descripción actualizada con info de terreno (riachuelo, quilas, piedras resbalosas)
+//   • Nueva AREA_CRITICA "bifurcacion_cascada" con TTS de advertencia (mano derecha = cascada)
+//
 // v2.1 (May 2026): + Suavetona Lex One (GPX Wikiloc, Alex Padilla)
 //
 // v2 (May 2026): KMZ depurado + GPX de Wikiloc consolidados
@@ -352,7 +356,7 @@ const SENDEROS = [
     color: '#EF4444',
     disciplinas: ['TR'],
     dificultad: "Muy Difícil",
-    descripcion: "Sendero corto y técnico hacia la cascada del parque. Baja al cauce y vuelve a subir. Pendiente máxima +39.8% — la más pronunciada puntualmente.",
+    descripcion: "Sendero muy técnico que va literalmente sobre el lecho del riachuelo. Hay que cruzar el agua, pasar sobre piedras resbalosas y avanzar agachado entre quilas, protegiendo la cara. Prepárate para mojarte los pies — si no andas con cambio de ropa o no tienes experiencia en cerro, NO se recomienda ingresar. A mitad de recorrido hay una bifurcación crítica donde el riachuelo se junta con una afluencia: tomar mano DERECHA, subiendo en contra del sentido del agua, para llegar a la cascada.",
 
     // Direccionalidad
     unidireccional: false,
@@ -1195,6 +1199,32 @@ const AREAS_CRITICAS = [
         titulo: 'Ruta B · norte',
         texto: 'Collico 1 → Conejo → Camino Principal de Ripio → Acceso principal',
         detalle: 'Por el norte del parque. Toma Collico 1, baja por Conejo hasta el Camino Principal de Ripio, y sigue el ripio al oeste hasta el acceso principal (Tótem).'
+      }
+    ]
+  },
+  {
+    id: 'bifurcacion_cascada',
+    nombre: 'Bifurcación hacia la Cascada',
+    emoji: '⚠️',
+    tipo: 'bifurcacion',
+    descripcion: 'Punto crítico sobre el cauce del riachuelo del sendero La Cascada. Aquí confluyen dos cursos de agua. Hay que tomar mano DERECHA, subiendo en contra del sentido del agua, para llegar a la cascada. Seguir por el cauce izquierdo es un error frecuente que lleva a perderse.',
+    intersecta: ['cascada'],
+    centro: [-73.1806225, -39.8208208],
+    poligono: [[-73.18046,-39.8208725], [-73.18046,-39.820769], [-73.1805552,-39.8206959], [-73.1806899,-39.8206959], [-73.1807851,-39.820769], [-73.1807851,-39.8208725], [-73.1806899,-39.8209456], [-73.1805552,-39.8209456], [-73.18046,-39.8208725]],
+    color: '#DC2626',
+    mensaje_tts: 'Atención. Bifurcación importante en el sendero a la cascada. La cascada queda por la afluencia de agua de mano derecha, subiendo en contra del sentido del agua. No sigas por el cauce de mano izquierda, te puedes perder. Precaución, piedras resbalosas.',
+    opciones: [
+      {
+        emoji: '✅',
+        titulo: 'Mano DERECHA · hacia la Cascada',
+        texto: 'Subir por la afluencia de mano derecha, en contra del sentido del agua',
+        detalle: 'Este es el camino correcto. La afluencia que viene desde tu mano derecha lleva a la cascada. Súbela en contra del agua. Cuida las piedras resbalosas.'
+      },
+      {
+        emoji: '⛔',
+        titulo: 'Mano IZQUIERDA · ERROR',
+        texto: 'Continuar por el cauce izquierdo aleja de la cascada',
+        detalle: 'Si sigues por el cauce de mano izquierda te alejas de la cascada y te puedes perder. Devuélvete al punto de bifurcación y toma la afluencia de mano derecha.'
       }
     ]
   }

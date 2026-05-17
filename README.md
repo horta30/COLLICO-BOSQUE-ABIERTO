@@ -67,7 +67,7 @@ COLLICO-BOSQUE-ABIERTO/
 | 2 | 🌿 Collico 1 | 4.93 km | 282m | 57.2 | Moderado | TR · XC · DH |
 | 3 | 🐆 Mirador del Puma | 5.09 km | 276m | 54.2 | Moderado | RP · TR |
 | 4 | 🏃 Vietnam | 0.67 km | 66m | 99.1 | Difícil | TR |
-| 5 | 💧 La Cascada | 0.47 km | 58m | 123.4 | Difícil | TR |
+| 5 | 💧 La Cascada | 0.47 km | 58m | 123.4 | Muy Difícil | TR |
 | 6 | 🔭 Mirador Kunstmann | 1.04 km | 98m | 93.7 | Difícil | RP · TR |
 | 7 | 🧗 El Muro | 1.6 km | 163m | 101.9 | Moderado | TR · XC |
 | 8 | 🤖 Androides | 1.79 km | 267m | 52.8 | Moderado | DH · XC |
