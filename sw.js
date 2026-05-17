@@ -18,7 +18,7 @@
 //   • iOS no permite background sync → cache solo se actualiza con la app abierta
 // =============================================================================
 
-const CACHE_VERSION   = 'cba-v4';        // Cambiar para invalidar todo el cache (v4: textos UI Tótem → Acceso principal, km en Pata de Gallo)
+const CACHE_VERSION   = 'cba-v6';        // Cambiar para invalidar todo el cache (v6: distancia bifurcación 200m → 80m)
 const APP_CACHE       = `${CACHE_VERSION}-app`;
 const TILES_CACHE     = `${CACHE_VERSION}-tiles`;
 

@@ -1,7 +1,12 @@
 // =============================================================================
-// COLLICO BOSQUE ABIERTO — senderos.js v2.3
+// COLLICO BOSQUE ABIERTO — senderos.js v2.4
 // FUENTE ÚNICA DE VERDAD · 15 senderos + 3 sub-segmentos · Métricas reales
 // 
+// v2.4 (May 2026):
+//   • Bifurcación Cascada: textos reescritos para dejar claro que es DOBLAR a la
+//     derecha EN EL PUNTO de la bifurcación (a ~80m del inicio), no que el sendero
+//     arranque por la derecha
+//
 // v2.3 (May 2026):
 //   • Pata de Gallo: descripción con km al acceso principal (4.37 km ruta A / 4.75 km ruta B)
 //   • UI: "Tótem" → "Acceso principal" en todas las strings visibles al usuario
@@ -361,7 +366,7 @@ const SENDEROS = [
     color: '#EF4444',
     disciplinas: ['TR'],
     dificultad: "Muy Difícil",
-    descripcion: "Sendero muy técnico que va literalmente sobre el lecho del riachuelo. Hay que cruzar el agua, pasar sobre piedras resbalosas y avanzar agachado entre quilas, protegiendo la cara. Prepárate para mojarte los pies — si no andas con cambio de ropa o no tienes experiencia en cerro, NO se recomienda ingresar. A mitad de recorrido hay una bifurcación crítica donde el riachuelo se junta con una afluencia: tomar mano DERECHA, subiendo en contra del sentido del agua, para llegar a la cascada.",
+    descripcion: "Sendero muy técnico que va literalmente sobre el lecho del riachuelo. Hay que cruzar el agua, pasar sobre piedras resbalosas y avanzar agachado entre quilas, protegiendo la cara. Prepárate para mojarte los pies — si no andas con cambio de ropa o no tienes experiencia en cerro, NO se recomienda ingresar. A unos 80m del inicio hay una bifurcación crítica: el riachuelo se junta con una afluencia y debes DOBLAR a tu derecha, subiendo por la afluencia en contra del sentido del agua, para llegar a la cascada.",
 
     // Direccionalidad
     unidireccional: false,
@@ -1212,24 +1217,24 @@ const AREAS_CRITICAS = [
     nombre: 'Bifurcación hacia la Cascada',
     emoji: '⚠️',
     tipo: 'bifurcacion',
-    descripcion: 'Punto crítico sobre el cauce del riachuelo del sendero La Cascada. Aquí confluyen dos cursos de agua. Hay que tomar mano DERECHA, subiendo en contra del sentido del agua, para llegar a la cascada. Seguir por el cauce izquierdo es un error frecuente que lleva a perderse.',
+    descripcion: 'Punto crítico a unos 80m del inicio del sendero La Cascada, sobre el cauce del riachuelo. Aquí confluyen dos cursos de agua y debes DOBLAR a tu derecha, subiendo por la afluencia en contra del sentido del agua, para llegar a la cascada. Si sigues derecho por el cauce principal te alejas de la cascada — es un error frecuente que lleva a perderse.',
     intersecta: ['cascada'],
     centro: [-73.1806225, -39.8208208],
     poligono: [[-73.18046,-39.8208725], [-73.18046,-39.820769], [-73.1805552,-39.8206959], [-73.1806899,-39.8206959], [-73.1807851,-39.820769], [-73.1807851,-39.8208725], [-73.1806899,-39.8209456], [-73.1805552,-39.8209456], [-73.18046,-39.8208725]],
     color: '#DC2626',
-    mensaje_tts: 'Atención. Bifurcación importante en el sendero a la cascada. La cascada queda por la afluencia de agua de mano derecha, subiendo en contra del sentido del agua. No sigas por el cauce de mano izquierda, te puedes perder. Precaución, piedras resbalosas.',
+    mensaje_tts: 'Atención. Llegaste al punto de bifurcación. En este punto dobla a tu derecha y sube por la afluencia en contra del sentido del agua para llegar a la cascada. No sigas derecho por el cauce principal, te alejarías de la cascada. Precaución, piedras resbalosas.',
     opciones: [
       {
         emoji: '✅',
-        titulo: 'Mano DERECHA · hacia la Cascada',
-        texto: 'Subir por la afluencia de mano derecha, en contra del sentido del agua',
-        detalle: 'Este es el camino correcto. La afluencia que viene desde tu mano derecha lleva a la cascada. Súbela en contra del agua. Cuida las piedras resbalosas.'
+        titulo: 'DOBLA a la DERECHA · hacia la Cascada',
+        texto: 'Acá gira a tu derecha y sigue subiendo por la afluencia, en contra del agua',
+        detalle: 'En este punto el riachuelo se bifurca. Dobla a tu derecha y sube por la afluencia que viene de ese lado — te lleva directo a la cascada. Cuida las piedras resbalosas.'
       },
       {
         emoji: '⛔',
-        titulo: 'Mano IZQUIERDA · ERROR',
-        texto: 'Continuar por el cauce izquierdo aleja de la cascada',
-        detalle: 'Si sigues por el cauce de mano izquierda te alejas de la cascada y te puedes perder. Devuélvete al punto de bifurcación y toma la afluencia de mano derecha.'
+        titulo: 'NO sigas DERECHO · ERROR',
+        texto: 'Continuar por el cauce principal hacia la izquierda aleja de la cascada',
+        detalle: 'Si NO doblas acá y sigues derecho por el cauce principal hacia la izquierda, te alejas de la cascada y te puedes perder. Si lo notas, devuélvete a este punto de bifurcación y dobla a la derecha.'
       }
     ]
   }
