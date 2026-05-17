@@ -18,7 +18,7 @@
 //   • iOS no permite background sync → cache solo se actualiza con la app abierta
 // =============================================================================
 
-const CACHE_VERSION   = 'cba-v6';        // Cambiar para invalidar todo el cache (v6: distancia bifurcación 200m → 80m)
+const CACHE_VERSION   = 'cba-v7';        // Cambiar para invalidar todo el cache (v7: panel área crítica más simple, badge dinámico)
 const APP_CACHE       = `${CACHE_VERSION}-app`;
 const TILES_CACHE     = `${CACHE_VERSION}-tiles`;
 

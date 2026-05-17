@@ -291,7 +291,7 @@
   <div class="panel-name" id="p-name">—</div>
   <div class="panel-tags" id="p-tags"></div>
   <div class="panel-desc" id="p-desc">—</div>
-  <div class="panel-stats">
+  <div class="panel-stats" id="p-stats">
     <div class="pst"><div class="pst-l">Distancia</div><div class="pst-v" id="p-dist">—</div></div>
     <div class="pst"><div class="pst-l" id="p-elev-l">Desnivel</div><div class="pst-v" id="p-elev">—</div></div>
     <div class="pst"><div class="pst-l">Dificultad</div><div class="pst-v" id="p-dif">—</div></div>
@@ -523,21 +523,24 @@ function openAreaPanel(id) {
   document.getElementById('p-bar').style.background = area.color;
   document.getElementById('p-name').textContent = area.emoji + ' ' + area.nombre;
   document.getElementById('p-desc').textContent = area.descripcion;
-  document.getElementById('p-dist').textContent = 'Cruce';
-  document.getElementById('p-elev').textContent = '—';
-  document.getElementById('p-elev-l').textContent = 'Tipo';
-  document.getElementById('p-elev').textContent = '🛤️ ' + area.tipo;
-  document.getElementById('p-dif').textContent = 'Orientación';
-  document.getElementById('p-dpkm').textContent = area.opciones.length + ' opciones';
   
-  // Tags
+  // Ocultar las 4 stat cards (Distancia/Tipo/Dificultad/Desnivel-km) — no aplican para áreas críticas
+  document.getElementById('p-stats').style.display = 'none';
+  
+  // Tag dinámico según el tipo de área crítica
   const tags = document.getElementById('p-tags');
   tags.innerHTML = '';
   const t = document.createElement('span');
   t.className = 'ptag';
-  t.style.background = 'rgba(255,107,53,.18)';
-  t.style.color = '#FF9F73';
-  t.textContent = '🐔 Cruce principal';
+  if (area.tipo === 'bifurcacion') {
+    t.style.background = 'rgba(220,38,38,.18)';
+    t.style.color = '#FCA5A5';
+    t.textContent = '⚠️ Bifurcación crítica';
+  } else {
+    t.style.background = 'rgba(255,107,53,.18)';
+    t.style.color = '#FF9F73';
+    t.textContent = '🐔 Cruce principal';
+  }
   tags.appendChild(t);
   
   // Panel de opciones de retorno
@@ -545,7 +548,7 @@ function openAreaPanel(id) {
   timesEl.innerHTML = '';
   const hdr = document.createElement('div');
   hdr.style.cssText = 'font-size:9px;font-weight:600;color:rgba(245,249,247,.5);text-transform:uppercase;letter-spacing:1px;margin:4px 0 6px;';
-  hdr.textContent = 'Rutas de evacuación al acceso principal';
+  hdr.textContent = area.tipo === 'bifurcacion' ? 'Cómo seguir desde acá' : 'Rutas de evacuación al acceso principal';
   timesEl.appendChild(hdr);
   
   area.opciones.forEach(op => {
@@ -783,6 +786,7 @@ const DISC_LABELS = {
 function openPanel(id) {
   const s = getSenderoById(id);
   if (!s) return;
+  document.getElementById('p-stats').style.display = '';  // restaurar visibilidad (puede haber sido ocultado por openAreaPanel)
   document.getElementById('p-bar').style.background = s.color;
   document.getElementById('p-name').textContent = s.emoji + ' ' + s.nombre;
   document.getElementById('p-desc').textContent = s.descripcion;
