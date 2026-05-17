@@ -32,25 +32,25 @@ const SENDEROS = [
     emoji: "🛣️",
     color: '#F5C242',
     disciplinas: ['RP', 'TR', 'XC'],
-    dificultad: "Fácil",
-    descripcion: "Camino vehicular de ripio que atraviesa el parque de oeste a este. Mayormente plano con descenso final hacia el río. Acceso a la mayoría de los senderos.",
+    dificultad: "Moderado",
+    descripcion: "Camino vehicular de ripio que atraviesa el parque de oeste a este. Asciende ondulado desde el río hasta 326m s.n.m. cerca de la cumbre. Acceso a la mayoría de los senderos.",
 
     // Direccionalidad
     unidireccional: false,
     sentido: null,
 
     // Métricas
-    dist_km:        7.72,
-    desnivel_pos:   72,
-    desnivel_neg:   384,
-    elevacion_min:  0,
-    elevacion_max:  311,
-    elevacion_avg:  153,
-    pendiente_avg_up: 1.7,
-    pendiente_avg_dn: -3.3,
-    pendiente_max_up: 8.0,
-    pendiente_max_dn: -12.0,
-    dpkm:           9.3,
+    dist_km:        7.75,
+    desnivel_pos:   436,
+    desnivel_neg:   129,
+    elevacion_min:  11,
+    elevacion_max:  326,
+    elevacion_avg:  166,
+    pendiente_avg_up: 7.6,
+    pendiente_avg_dn: -5.3,
+    pendiente_max_up: 26.3,
+    pendiente_max_dn: -20.9,
+    dpkm:           56.3,
 
     geofence: {
       inicio: { lng: -73.2028504, lat: -39.8188634, radio: 80 },
@@ -129,17 +129,17 @@ const SENDEROS = [
     sentido: null,
 
     // Métricas
-    dist_km:        4.92,
-    desnivel_pos:   281,
-    desnivel_neg:   133,
+    dist_km:        4.93,
+    desnivel_pos:   282,
+    desnivel_neg:   134,
     elevacion_min:  86,
     elevacion_max:  327,
     elevacion_avg:  211,
-    pendiente_avg_up: 7.9,
+    pendiente_avg_up: 8.0,
     pendiente_avg_dn: -8.9,
-    pendiente_max_up: 24.2,
-    pendiente_max_dn: -29.1,
-    dpkm:           57.1,
+    pendiente_max_up: 23.6,
+    pendiente_max_dn: -29.8,
+    dpkm:           57.2,
     tiene_subsegmentos: true,
 
     geofence: {
@@ -356,17 +356,17 @@ const SENDEROS = [
     sentido: null,
 
     // Métricas
-    dist_km:        0.56,
+    dist_km:        0.47,
     desnivel_pos:   58,
-    desnivel_neg:   26,
+    desnivel_neg:   22,
     elevacion_min:  82,
     elevacion_max:  123,
-    elevacion_avg:  96,
-    pendiente_avg_up: 18.5,
+    elevacion_avg:  97,
+    pendiente_avg_up: 20.0,
     pendiente_avg_dn: -7.0,
-    pendiente_max_up: 39.8,
-    pendiente_max_dn: -32.3,
-    dpkm:           103.4,
+    pendiente_max_up: 39.9,
+    pendiente_max_dn: -37.3,
+    dpkm:           123.4,
 
     geofence: {
       inicio: { lng: -73.1821443, lat: -39.8215840, radio: 50 },
@@ -484,7 +484,7 @@ const SENDEROS = [
     emoji: "🧗",
     color: '#8338EC',
     disciplinas: ['TR', 'XC'],
-    dificultad: "Difícil",
+    dificultad: "Moderado",
     descripcion: "Subida sostenida desde el río hacia el sector alto del parque. Conecta con el inicio de Collico 1.",
 
     // Direccionalidad
@@ -492,16 +492,16 @@ const SENDEROS = [
     sentido: null,
 
     // Métricas
-    dist_km:        1.6,
+    dist_km:        1.60,
     desnivel_pos:   163,
-    desnivel_neg:   5,
-    elevacion_min:  17,
+    desnivel_neg:   6,
+    elevacion_min:  18,
     elevacion_max:  179,
-    elevacion_avg:  109,
+    elevacion_avg:  110,
     pendiente_avg_up: 10.9,
-    pendiente_avg_dn: -3.4,
-    pendiente_max_up: 25.7,
-    pendiente_max_dn: -13.5,
+    pendiente_avg_dn: -3.9,
+    pendiente_max_up: 27.2,
+    pendiente_max_dn: -14.7,
     dpkm:           101.9,
 
     geofence: {
@@ -591,7 +591,7 @@ const SENDEROS = [
     emoji: "🌳",
     color: '#06A77D',
     disciplinas: ['TR', 'XC'],
-    dificultad: "Moderado",
+    dificultad: "Fácil",
     descripcion: "Sendero apto para caminata, trail y XC. Recorrido ondulado por el bosque.",
 
     // Direccionalidad
@@ -600,16 +600,16 @@ const SENDEROS = [
 
     // Métricas
     dist_km:        1.35,
-    desnivel_pos:   93,
-    desnivel_neg:   68,
-    elevacion_min:  81,
-    elevacion_max:  167,
-    elevacion_avg:  127,
-    pendiente_avg_up: 6.9,
-    pendiente_avg_dn: -5.0,
-    pendiente_max_up: 20.0,
-    pendiente_max_dn: -25.0,
-    dpkm:           69.1,
+    desnivel_pos:   40,
+    desnivel_neg:   42,
+    elevacion_min:  102,
+    elevacion_max:  138,
+    elevacion_avg:  124,
+    pendiente_avg_up: 5.1,
+    pendiente_avg_dn: -6.9,
+    pendiente_max_up: 15.4,
+    pendiente_max_dn: -17.4,
+    dpkm:           29.6,
 
     geofence: {
       inicio: { lng: -73.1884264, lat: -39.8177136, radio: 50 },
@@ -654,17 +654,17 @@ const SENDEROS = [
     sentido: null,
 
     // Métricas
-    dist_km:        0.68,
-    desnivel_pos:   57,
-    desnivel_neg:   21,
-    elevacion_min:  58,
-    elevacion_max:  116,
-    elevacion_avg:  84,
-    pendiente_avg_up: 8.4,
-    pendiente_avg_dn: -3.1,
-    pendiente_max_up: 20.0,
-    pendiente_max_dn: -15.0,
-    dpkm:           84.5,
+    dist_km:        0.69,
+    desnivel_pos:   46,
+    desnivel_neg:   17,
+    elevacion_min:  86,
+    elevacion_max:  121,
+    elevacion_avg:  101,
+    pendiente_avg_up: 9.1,
+    pendiente_avg_dn: -4.6,
+    pendiente_max_up: 24.0,
+    pendiente_max_dn: -12.8,
+    dpkm:           66.7,
 
     geofence: {
       inicio: { lng: -73.1902177, lat: -39.8234005, radio: 50 },
@@ -693,7 +693,7 @@ const SENDEROS = [
     emoji: "🚵",
     color: '#E63946',
     disciplinas: ['DH', 'XC'],
-    dificultad: "Técnico DH",
+    dificultad: "Moderado",
     descripcion: "Pista de DH completa. Unidireccional en sentido bajada — también recorrible en XC. Descenso técnico de ~175m de desnivel a lo largo de 1.9 km.",
 
     // Direccionalidad
@@ -751,7 +751,7 @@ const SENDEROS = [
     color: '#FFB703',
     disciplinas: ['TR', 'XC', 'DH'],
     dificultad: "Fácil",
-    descripcion: "Tramo descendente que conecta sectores del parque. Track completo de 0.63 km con suave descenso constante.",
+    descripcion: "Sendero corto en suave descenso. 0.63 km.",
 
     // Direccionalidad
     unidireccional: false,
@@ -952,18 +952,18 @@ const DESTINOS = {
     nombre: "Cumbre",
     emoji: "🏔️",
     descripcion: "Punto más alto del parque · 327m s.n.m. Vista 360° del valle.",
-    dist_total_km: 6.98,
-    desnivel_pos: 444,
-    dpkm: 63.6,
+    dist_total_km: 7.06,
+    desnivel_pos: 475,
+    dpkm: 67.3,
     dificultad: "Moderado",
-    tiempo_trek:  "2h 06 – 2h 51",
-    tiempo_trail: "1h 12 – 1h 38",
-    tiempo_xc:    "0h 57 – 1h 18",
+    tiempo_trek:  "2h 10 – 2h 56",
+    tiempo_trail: "1h 15 – 1h 41",
+    tiempo_xc:    "1h 00 – 1h 21",
     pasa_por: ["Sanguijuela", "Chela Track", "Los Pinos"],
     pasos: [
-      { tipo: 'ripio_hasta', hasta_idx: 29, label: "Ripio hasta El Muro (0.46 km)", color: '#F5C242' },
-      { tipo: 'sendero', id: 'el_muro', label: "El Muro (1.60 km · +163m)", color: '#8338EC' },
-      { tipo: 'sendero', id: 'collico1', label: "Collico 1 hasta Cumbre (4.92 km)", color: '#74C69D' }
+      { tipo: 'ripio_hasta', hasta_idx: 29, label: "Ripio hasta El Muro (0.53 km)", color: '#F5C242' },
+      { tipo: 'sendero', id: 'el_muro', label: "El Muro (1.6 km · +163m)", color: '#8338EC' },
+      { tipo: 'sendero', id: 'collico1', label: "Collico 1 hasta Cumbre (4.93 km · +282m)", color: '#74C69D' }
     ]
   },
 
@@ -972,15 +972,15 @@ const DESTINOS = {
     nombre: "Mirador Kunstmann",
     emoji: "🔭",
     descripcion: "Mirador con vista al valle del Calle-Calle y Valdivia. Familiar.",
-    dist_total_km: 1.72,
-    desnivel_pos: 98,
-    dpkm: 57.0,
+    dist_total_km: 1.79,
+    desnivel_pos: 140,
+    dpkm: 78.2,
     dificultad: "Moderado",
-    tiempo_trek:  "30 – 40 min",
-    tiempo_trail: "17 – 23 min",
+    tiempo_trek:  "34 – 46 min",
+    tiempo_trail: "20 – 27 min",
     pasa_por: [],
     pasos: [
-      { tipo: 'ripio_hasta', hasta_idx: 41, label: "Ripio hasta bifurcación (0.68 km)", color: '#F5C242' },
+      { tipo: 'ripio_hasta', hasta_idx: 41, label: "Ripio hasta bifurcación (0.75 km)", color: '#F5C242' },
       { tipo: 'sendero', id: 'mirador_kunstmann', label: "Mirador Kunstmann (1.04 km · +98m)", color: '#4CC9F0' }
     ]
   },
@@ -990,15 +990,15 @@ const DESTINOS = {
     nombre: "Mirador del Puma",
     emoji: "🐆",
     descripcion: "Mirador con vista al valle Calle-Calle y los Andes al este. Familiar.",
-    dist_total_km: 7.47,
-    desnivel_pos: 276,
-    dpkm: 36.9,
+    dist_total_km: 7.52,
+    desnivel_pos: 413,
+    dpkm: 54.9,
     dificultad: "Moderado",
-    tiempo_trek:  "1h 58 – 2h 40",
-    tiempo_trail: "1h 05 – 1h 28",
+    tiempo_trek:  "2h 10 – 2h 57",
+    tiempo_trail: "1h 14 – 1h 40",
     pasa_por: [],
     pasos: [
-      { tipo: 'ripio_hasta', hasta_idx: 133, label: "Ripio hasta bifurcación (2.38 km)", color: '#F5C242' },
+      { tipo: 'ripio_hasta', hasta_idx: 133, label: "Ripio hasta bifurcación (2.43 km)", color: '#F5C242' },
       { tipo: 'sendero', id: 'mirador_puma', label: "Mirador del Puma (5.09 km · +276m)", color: '#40916C' }
     ]
   },
@@ -1007,19 +1007,19 @@ const DESTINOS = {
     id: 'cascada',
     nombre: "La Cascada",
     emoji: "💧",
-    descripcion: "Cascada del parque. Acceso técnico desde Collico 1.",
-    dist_total_km: 3.33,
-    desnivel_pos: 251,
-    dpkm: 75.4,
+    descripcion: "Cascada del parque. Acceso técnico desde Collico 1 vía El Muro.",
+    dist_total_km: 3.92,
+    desnivel_pos: 326,
+    dpkm: 83.2,
     dificultad: "Moderado",
-    tiempo_trek:  "1h 03 – 1h 26",
-    tiempo_trail: "37 – 50 min",
+    tiempo_trek:  "1h 17 – 1h 45",
+    tiempo_trail: "0h 45 – 1h 01",
     pasa_por: [],
     pasos: [
-      { tipo: 'ripio_hasta', hasta_idx: 29, label: "Ripio hasta El Muro (0.46 km)", color: '#F5C242' },
-      { tipo: 'sendero', id: 'el_muro', label: "El Muro (1.60 km · +163m)", color: '#8338EC' },
-      { tipo: 'sendero_hasta', id: 'collico1', hasta_idx: 123, label: "Collico 1 hasta bifurcación Cascada (0.71 km)", color: '#74C69D' },
-      { tipo: 'sendero', id: 'cascada', label: "Cascada (0.56 km · +58m)", color: '#EF4444' }
+      { tipo: 'ripio_hasta', hasta_idx: 29, label: "Ripio hasta El Muro (0.53 km)", color: '#F5C242' },
+      { tipo: 'sendero', id: 'el_muro', label: "El Muro (1.6 km · +163m)", color: '#8338EC' },
+      { tipo: 'sendero_hasta', id: 'collico1', hasta_idx: 123, label: "Collico 1 hasta bifurcación Cascada (1.32 km · +75m)", color: '#74C69D' },
+      { tipo: 'sendero', id: 'cascada', label: "Cascada (0.47 km · +58m)", color: '#EF4444' }
     ]
   }
 };
@@ -1113,6 +1113,70 @@ function categoriaDificultad(dpkm) {
   if (dpkm < 120) return 'Difícil';
   return 'Muy Difícil';
 }
+
+// =============================================================================
+// AREAS_CRITICAS — puntos clave de orientación del parque
+//
+// A diferencia de los geofences puntuales, las áreas son polígonos que se
+// dibujan en el mapa y disparan alertas especiales con información de
+// orientación y opciones de retorno cuando el usuario entra.
+// =============================================================================
+
+const AREAS_CRITICAS = [
+  {
+    id: 'pata_de_gallo',
+    nombre: 'Pata de Gallo',
+    emoji: '🐔',
+    tipo: 'cruce',
+    descripcion: 'Cruce principal del parque · punto de orientación y retorno al Tótem. Aquí se intersectan el Camino Principal de Ripio, Collico 1 y el inicio de Sanguijuela.',
+    intersecta: ['camino_principal', 'collico1', 'sanguijuela'],
+    centro: [-73.1673788, -39.8306065],
+    poligono: [[-73.1669485,-39.8301923], [-73.1672288,-39.8301969], [-73.1681884,-39.8300902], [-73.1676078,-39.8304125], [-73.1674062,-39.8306381], [-73.1677087,-39.8311087], [-73.1678232,-39.8313951], [-73.1672751,-39.8310835], [-73.1666532,-39.8307553], [-73.1669485,-39.8301923]],
+    color: '#FF6B35',
+    mensaje_tts: 'Estás en la Pata de Gallo. Para regresar al acceso principal tienes dos rutas: por el Camino Principal de Ripio hacia el oeste, o por Collico 1 y Conejo conectando al Ripio Principal.',
+    opciones: [
+      {
+        emoji: '🛣️',
+        titulo: 'Ruta A · directa',
+        texto: 'Camino Principal de Ripio → Tótem',
+        detalle: 'La ruta más simple. Sigue el ripio hacia el oeste hasta llegar al Tótem.'
+      },
+      {
+        emoji: '🌿',
+        titulo: 'Ruta B · norte',
+        texto: 'Collico 1 → Conejo → Camino Principal de Ripio → Acceso principal',
+        detalle: 'Por el norte del parque. Toma Collico 1, baja por Conejo hasta el Camino Principal de Ripio, y sigue el ripio al oeste hasta el acceso principal (Tótem).'
+      }
+    ]
+  }
+];
+
+// Detectar si un punto (lng, lat) está dentro de un polígono (ray-casting)
+function pointInArea(lng, lat, poligono) {
+  let inside = false;
+  let j = poligono.length - 1;
+  for (let i = 0; i < poligono.length; i++) {
+    const xi = poligono[i][0], yi = poligono[i][1];
+    const xj = poligono[j][0], yj = poligono[j][1];
+    if (((yi > lat) !== (yj > lat)) && (lng < (xj - xi) * (lat - yi) / (yj - yi + 1e-15) + xi)) {
+      inside = !inside;
+    }
+    j = i;
+  }
+  return inside;
+}
+
+function getAreaAt(lng, lat) {
+  for (const a of AREAS_CRITICAS) {
+    if (pointInArea(lng, lat, a.poligono)) return a;
+  }
+  return null;
+}
+
+window.AREAS_CRITICAS = AREAS_CRITICAS;
+window.pointInArea = pointInArea;
+window.getAreaAt = getAreaAt;
+
 
 // =============================================================================
 // EXPORTS GLOBALES

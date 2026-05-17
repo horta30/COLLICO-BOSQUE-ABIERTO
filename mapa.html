@@ -293,9 +293,9 @@
   <div class="panel-desc" id="p-desc">—</div>
   <div class="panel-stats">
     <div class="pst"><div class="pst-l">Distancia</div><div class="pst-v" id="p-dist">—</div></div>
-    <div class="pst"><div class="pst-l">Desnivel +</div><div class="pst-v" id="p-elev">—</div></div>
+    <div class="pst"><div class="pst-l" id="p-elev-l">Desnivel</div><div class="pst-v" id="p-elev">—</div></div>
     <div class="pst"><div class="pst-l">Dificultad</div><div class="pst-v" id="p-dif">—</div></div>
-    <div class="pst"><div class="pst-l">D+/km</div><div class="pst-v" id="p-dpkm">—</div></div>
+    <div class="pst"><div class="pst-l">Desnivel/km</div><div class="pst-v" id="p-dpkm">—</div></div>
   </div>
   <!-- Tiempos por disciplina (se rellena dinámicamente) -->
   <div id="p-times" style="margin-top:10px"></div>
@@ -375,6 +375,7 @@ map.on('load', () => {
   loadTotem();
   loadPOIs();
   loadRipio();
+  loadAreasCriticas();
   initRutaLayer();
   buildPlanList();
   initFromURL();
@@ -478,6 +479,111 @@ function loadPOIs() {
 
     new maplibregl.Marker({ element:wrap, anchor:'top' }).setLngLat(poi.coord).addTo(map);
   });
+}
+
+// =============================================================================
+// AREAS CRÍTICAS — polígonos de orientación (Pata de Gallo, etc.)
+// =============================================================================
+function loadAreasCriticas() {
+  if (typeof AREAS_CRITICAS === 'undefined' || !AREAS_CRITICAS.length) return;
+  
+  AREAS_CRITICAS.forEach(area => {
+    // Polígono con relleno semi-transparente + borde
+    const polyCoords = area.poligono.slice();
+    polyCoords.push(polyCoords[0]); // cerrar el polígono
+    
+    map.addSource('area-' + area.id, {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        properties: { id: area.id, nombre: area.nombre },
+        geometry: { type: 'Polygon', coordinates: [polyCoords] }
+      }
+    });
+    
+    map.addLayer({
+      id: 'area-fill-' + area.id,
+      type: 'fill',
+      source: 'area-' + area.id,
+      paint: { 'fill-color': area.color, 'fill-opacity': 0.22 }
+    });
+    
+    map.addLayer({
+      id: 'area-line-' + area.id,
+      type: 'line',
+      source: 'area-' + area.id,
+      paint: { 'line-color': area.color, 'line-width': 2.5, 'line-dasharray': [2, 1] }
+    });
+    
+    // Marker central con emoji
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:transform .15s;';
+    const ic = document.createElement('div');
+    ic.style.cssText = 'font-size:34px;filter:drop-shadow(0 2px 8px rgba(0,0,0,.9));line-height:1;';
+    ic.textContent = area.emoji;
+    const lbl = document.createElement('div');
+    lbl.style.cssText = `font-family:Inter,sans-serif;font-size:11px;font-weight:800;color:#fff;background:${area.color};padding:3px 9px;border-radius:8px;white-space:nowrap;letter-spacing:.3px;box-shadow:0 2px 8px rgba(0,0,0,.5);`;
+    lbl.textContent = area.nombre;
+    wrap.appendChild(ic);
+    wrap.appendChild(lbl);
+    wrap.addEventListener('click', () => openAreaPanel(area.id));
+    
+    new maplibregl.Marker({ element: wrap, anchor: 'top' }).setLngLat(area.centro).addTo(map);
+    
+    // Click en el polígono también abre el panel
+    map.on('click', 'area-fill-' + area.id, () => openAreaPanel(area.id));
+    map.on('mouseenter', 'area-fill-' + area.id, () => map.getCanvas().style.cursor = 'pointer');
+    map.on('mouseleave', 'area-fill-' + area.id, () => map.getCanvas().style.cursor = '');
+  });
+}
+
+function openAreaPanel(id) {
+  const area = AREAS_CRITICAS.find(a => a.id === id);
+  if (!area) return;
+  
+  document.getElementById('p-bar').style.background = area.color;
+  document.getElementById('p-name').textContent = area.emoji + ' ' + area.nombre;
+  document.getElementById('p-desc').textContent = area.descripcion;
+  document.getElementById('p-dist').textContent = 'Cruce';
+  document.getElementById('p-elev').textContent = '—';
+  document.getElementById('p-elev-l').textContent = 'Tipo';
+  document.getElementById('p-elev').textContent = '🛤️ ' + area.tipo;
+  document.getElementById('p-dif').textContent = 'Orientación';
+  document.getElementById('p-dpkm').textContent = area.opciones.length + ' opciones';
+  
+  // Tags
+  const tags = document.getElementById('p-tags');
+  tags.innerHTML = '';
+  const t = document.createElement('span');
+  t.className = 'ptag';
+  t.style.background = 'rgba(255,107,53,.18)';
+  t.style.color = '#FF9F73';
+  t.textContent = '🐔 Cruce principal';
+  tags.appendChild(t);
+  
+  // Panel de opciones de retorno
+  const timesEl = document.getElementById('p-times');
+  timesEl.innerHTML = '';
+  const hdr = document.createElement('div');
+  hdr.style.cssText = 'font-size:9px;font-weight:600;color:rgba(245,249,247,.5);text-transform:uppercase;letter-spacing:1px;margin:4px 0 6px;';
+  hdr.textContent = 'Rutas de evacuación al Tótem';
+  timesEl.appendChild(hdr);
+  
+  area.opciones.forEach(op => {
+    const row = document.createElement('div');
+    row.style.cssText = 'padding:12px 12px;background:rgba(245,249,247,.04);border-radius:8px;margin-bottom:6px;border-left:3px solid ' + area.color + ';';
+    row.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <span style="font-size:18px">${op.emoji}</span>
+        <div style="font-size:11px;font-weight:700;color:${area.color};text-transform:uppercase;letter-spacing:.5px">${op.titulo || 'Opción'}</div>
+      </div>
+      <div style="font-size:13px;color:var(--w);font-weight:600;margin-bottom:4px">${op.texto}</div>
+      <div style="font-size:11px;color:var(--m);line-height:1.4">${op.detalle || ''}</div>
+    `;
+    timesEl.appendChild(row);
+  });
+  
+  document.getElementById('panel').classList.add('open');
 }
 
 function loadRipio() {
@@ -702,9 +808,26 @@ function openPanel(id) {
   document.getElementById('p-name').textContent = s.emoji + ' ' + s.nombre;
   document.getElementById('p-desc').textContent = s.descripcion;
   document.getElementById('p-dist').textContent = s.dist_km >= 1 ? s.dist_km+' km' : Math.round(s.dist_km*1000)+' m';
-  document.getElementById('p-elev').textContent = '+'+s.desnivel_pos+'m';
+  
+  // Desnivel real: el mayor de D+ y D-
+  const dpos = s.desnivel_pos || 0;
+  const dneg = s.desnivel_neg || 0;
+  const desnivelReal = Math.max(dpos, dneg);
+  let elevText = desnivelReal + 'm';
+  let elevLabel = 'Desnivel';
+  if (s.unidireccional) {
+    if (s.sentido === 'bajada') { elevText = '↓ ' + desnivelReal + 'm'; elevLabel = 'Desnivel ↓'; }
+    else if (s.sentido === 'subida') { elevText = '↑ ' + desnivelReal + 'm'; elevLabel = 'Desnivel ↑'; }
+  } else if (dpos > dneg) {
+    elevText = '+' + desnivelReal + 'm';
+  }
+  document.getElementById('p-elev').textContent = elevText;
+  document.getElementById('p-elev-l').textContent = elevLabel;
   document.getElementById('p-dif').textContent  = s.dificultad;
-  document.getElementById('p-dpkm').textContent = s.dpkm + ' m/km';
+  
+  // Recalcular D+/km con desnivel real
+  const dpkmReal = s.dist_km > 0 ? Math.round(desnivelReal / s.dist_km * 10) / 10 : 0;
+  document.getElementById('p-dpkm').textContent = dpkmReal + ' m/km';
 
   // Limpiar bloque de tiempos (se decidió quitarlos para senderos bidireccionales)
   document.getElementById('p-times').innerHTML = '';
@@ -844,6 +967,7 @@ function onPos(pos) {
 
   // Geofence con TTS + toast (CC, una vez por sesión)
   CC.checkGeofences(lat, lng);
+  CC.checkAreasCriticas(lat, lng);
 }
 
 

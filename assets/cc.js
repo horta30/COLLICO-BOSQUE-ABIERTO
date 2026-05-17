@@ -173,6 +173,36 @@ window.CC = (() => {
     _triggerAlert(winner.sendero, winner.tipo);
   }
 
+  /**
+   * Detecta si el usuario está dentro de un área crítica (polígono) y
+   * dispara una alerta especial de orientación. Una vez por sesión por área.
+   */
+  function checkAreasCriticas(userLat, userLng) {
+    if (typeof window.AREAS_CRITICAS === 'undefined') return;
+    if (typeof window.pointInArea !== 'function') return;
+    
+    for (const area of window.AREAS_CRITICAS) {
+      const key = 'area_' + area.id;
+      if (_visited.has(key)) continue;
+      if (window.pointInArea(userLng, userLat, area.poligono)) {
+        _visited.add(key);
+        _triggerAreaAlert(area);
+        break;
+      }
+    }
+  }
+
+  function _triggerAreaAlert(area) {
+    const tts = area.mensaje_tts || `Estás en ${area.nombre}. Punto de orientación del parque.`;
+    const toast = `${area.emoji} ${area.nombre} · ${area.descripcion.split('·')[0].trim()}`;
+    
+    if ('vibrate' in navigator) {
+      try { navigator.vibrate([200, 100, 200, 100, 200]); } catch(e) {}
+    }
+    speak(tts, true);  // prioritario
+    showToast(toast, 'warn', 8000);
+  }
+
   function _triggerAlert(s, tipo) {
     const emoji = s.emoji || '📍';
     let audioMsg, toastMsg, level, dur;
@@ -376,6 +406,7 @@ window.CC = (() => {
     speak, unlockAudio, toggleAudio, isAudioAvailable,
     // Geofence
     checkGeofences,
+    checkAreasCriticas,
     // Toast
     showToast,
     // Wake Lock
