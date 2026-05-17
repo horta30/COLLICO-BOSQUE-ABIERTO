@@ -188,6 +188,16 @@
     return 'b-dh';
   };
   const fmtKm = (km) => km < 1 ? Math.round(km*1000) + ' m' : km.toFixed(2).replace(/\.?0+$/,'') + ' km';
+  
+  // Desnivel real: el mayor entre D+ y D-, con flecha si es unidireccional
+  const fmtDesnivel = (s) => {
+    const desn = Math.max(s.desnivel_pos, s.desnivel_neg);
+    if (s.unidireccional) {
+      const arrow = s.sentido === 'bajada' ? '↓' : (s.sentido === 'subida' ? '↑' : '');
+      return `${arrow} ${desn}m`;
+    }
+    return `+${desn}m`;
+  };
 
   const list = document.getElementById('trail-list');
   // Ordenar: troncales + senderos por dificultad
@@ -201,7 +211,7 @@
         <div class="t-name">${s.nombre}</div>
         <div class="t-meta">
           <span>${fmtKm(s.dist_km)}</span>
-          <span>+${s.desnivel_pos}m D+</span>
+          <span>${fmtDesnivel(s)}</span>
           <span class="badge ${badgeClass(s.dificultad)}">${s.dificultad}</span>
           <span class="disc-pills">
             ${s.disciplinas.map(d => `<span class="disc-pill">${d}</span>`).join('')}

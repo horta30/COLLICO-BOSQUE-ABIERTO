@@ -283,7 +283,7 @@ const SENDEROS = [
     emoji: "🏃",
     color: '#FB8500',
     disciplinas: ['TR'],
-    dificultad: "Difícil",
+    dificultad: "Muy Difícil",
     descripcion: "Sendero corto pero exigente. Arranca cerca del Tótem y sube directo por el bosque. Pendiente máxima +32% — de las secciones más empinadas del parque.",
 
     // Direccionalidad
@@ -348,7 +348,7 @@ const SENDEROS = [
     emoji: "💧",
     color: '#EF4444',
     disciplinas: ['TR'],
-    dificultad: "Difícil",
+    dificultad: "Muy Difícil",
     descripcion: "Sendero corto y técnico hacia la cascada del parque. Baja al cauce y vuelve a subir. Pendiente máxima +39.8% — la más pronunciada puntualmente.",
 
     // Direccionalidad
@@ -429,7 +429,7 @@ const SENDEROS = [
     emoji: "🔭",
     color: '#4CC9F0',
     disciplinas: ['RP', 'TR'],
-    dificultad: "Difícil",
+    dificultad: "Fácil",
     descripcion: "Mirador con vista panorámica del valle y la ciudad de Valdivia. Camino de ripio apto para familias, asciende constante desde el nivel del río con una meseta intermedia.",
 
     // Direccionalidad
@@ -484,7 +484,7 @@ const SENDEROS = [
     emoji: "🧗",
     color: '#8338EC',
     disciplinas: ['TR', 'XC'],
-    dificultad: "Moderado",
+    dificultad: "Difícil",
     descripcion: "Subida sostenida desde el río hacia el sector alto del parque. Conecta con el inicio de Collico 1.",
 
     // Direccionalidad
@@ -693,7 +693,7 @@ const SENDEROS = [
     emoji: "🚵",
     color: '#E63946',
     disciplinas: ['DH', 'XC'],
-    dificultad: "Moderado",
+    dificultad: "Difícil",
     descripcion: "Pista de DH completa. Unidireccional en sentido bajada — también recorrible en XC. Descenso técnico de ~175m de desnivel a lo largo de 1.9 km.",
 
     // Direccionalidad
@@ -750,7 +750,7 @@ const SENDEROS = [
     emoji: "🐰",
     color: '#FFB703',
     disciplinas: ['TR', 'XC', 'DH'],
-    dificultad: "Fácil",
+    dificultad: "Moderado",
     descripcion: "Sendero corto en suave descenso. 0.63 km.",
 
     // Direccionalidad
@@ -791,7 +791,7 @@ const SENDEROS = [
     emoji: "🔥",
     color: '#9D0208',
     disciplinas: ['DH'],
-    dificultad: "Técnico DH",
+    dificultad: "Muy Difícil",
     descripcion: "La pista más DH del parque. Exclusiva para downhill — unidireccional en bajada. Desnivel de 173m en 1.1 km.",
 
     // Direccionalidad
