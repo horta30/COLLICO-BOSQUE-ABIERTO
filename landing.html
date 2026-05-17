@@ -160,13 +160,16 @@
   const totalKm   = SENDEROS.filter(s => s.id !== 'camino_principal')
                             .reduce((a,s) => a + s.dist_km, 0).toFixed(1);
   const totalSend = SENDEROS.filter(s => s.id !== 'camino_principal').length;
-  const dPlusMax  = Math.max(...SENDEROS.map(s => s.desnivel_pos));
+  const senderoDmax = SENDEROS.reduce((max, s) => s.desnivel_pos > max.desnivel_pos ? s : max, SENDEROS[0]);
+  const dPlusMax  = senderoDmax.desnivel_pos;
+  // Nombre corto para mostrar bajo el D+ max
+  const dMaxLabel = senderoDmax.id === 'camino_principal' ? 'Ripio principal' : senderoDmax.nombre;
   const discs     = new Set(); SENDEROS.forEach(s => s.disciplinas.forEach(d => discs.add(d)));
 
   document.getElementById('stats-bar').innerHTML = `
     <div class="stat"><div class="sv">${totalKm}<span class="su">km</span></div><div class="sl">Red total</div></div>
     <div class="stat"><div class="sv">${totalSend}</div><div class="sl">Senderos</div></div>
-    <div class="stat"><div class="sv">${dPlusMax}<span class="su">m</span></div><div class="sl">D+ máximo</div></div>
+    <div class="stat"><div class="sv">${dPlusMax}<span class="su">m</span></div><div class="sl">D+ máx · ${dMaxLabel}</div></div>
     <div class="stat"><div class="sv">${discs.size}</div><div class="sl">Disciplinas</div></div>
   `;
 
