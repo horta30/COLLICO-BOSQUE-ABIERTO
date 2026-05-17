@@ -156,10 +156,9 @@
 // Renderizado dinámico desde senderos.js — la lista de senderos NUNCA se duplica
 // =============================================================================
 (function() {
-  // Stats
-  const totalKm   = SENDEROS.filter(s => s.id !== 'camino_principal')
-                            .reduce((a,s) => a + s.dist_km, 0).toFixed(1);
-  const totalSend = SENDEROS.filter(s => s.id !== 'camino_principal').length;
+  // Stats — incluyendo TODOS los senderos (igual que el mapa)
+  const totalKm   = SENDEROS.reduce((a,s) => a + s.dist_km, 0).toFixed(1);
+  const totalSend = SENDEROS.length;
   const senderoDmax = SENDEROS.reduce((max, s) => s.desnivel_pos > max.desnivel_pos ? s : max, SENDEROS[0]);
   const dPlusMax  = senderoDmax.desnivel_pos;
   // Nombre corto para mostrar bajo el D+ max
@@ -200,9 +199,9 @@
   };
 
   const list = document.getElementById('trail-list');
-  // Ordenar: troncales + senderos por dificultad
-  const ordered = SENDEROS.filter(s => s.id !== 'camino_principal')
-    .sort((a,b) => a.dpkm - b.dpkm);
+  // Mostrar TODOS los senderos (incl. ripio) ordenados por dificultad
+  const difOrden = { 'Fácil': 1, 'Moderado': 2, 'Difícil': 3, 'Muy Difícil': 4, 'Técnico DH': 4 };
+  const ordered = SENDEROS.slice().sort((a,b) => (difOrden[a.dificultad]||5) - (difOrden[b.dificultad]||5) || a.dpkm - b.dpkm);
 
   list.innerHTML = ordered.map(s => `
     <div class="trail" style="border-left-color:${s.color}">
