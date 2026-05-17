@@ -609,9 +609,9 @@ function renderRuta(destinoId) {
   const timesEl = document.getElementById('rs-times');
   timesEl.innerHTML = '';
   const filas = [];
-  if (dest.tiempo_trek)  filas.push({ ic: '🥾',  lbl: 'Trekking',     val: dest.tiempo_trek,  sub: '4 km/h' });
-  if (dest.tiempo_trail) filas.push({ ic: '🏃',  lbl: 'Trail running', val: dest.tiempo_trail, sub: '8 km/h' });
-  if (dest.tiempo_xc)    filas.push({ ic: '🚵', lbl: 'XC MTB',        val: dest.tiempo_xc,    sub: '12 km/h' });
+  if (dest.tiempo_trek)  filas.push({ ic: '🥾',  lbl: 'Trekking',     val: dest.tiempo_trek });
+  if (dest.tiempo_trail) filas.push({ ic: '🏃',  lbl: 'Trail running', val: dest.tiempo_trail });
+  if (dest.tiempo_xc)    filas.push({ ic: '🚵', lbl: 'XC MTB',        val: dest.tiempo_xc });
   
   if (filas.length) {
     const hdr = document.createElement('div');
@@ -621,16 +621,13 @@ function renderRuta(destinoId) {
     
     filas.forEach(f => {
       const row = document.createElement('div');
-      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(245,249,247,.04);border-radius:8px;margin-bottom:4px;';
+      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(245,249,247,.04);border-radius:8px;margin-bottom:4px;';
       row.innerHTML = `
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:14px">${f.ic}</span>
-          <div>
-            <div style="font-size:12px;font-weight:600;color:var(--w)">${f.lbl}</div>
-            <div style="font-size:10px;color:var(--m)">${f.sub}</div>
-          </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:16px">${f.ic}</span>
+          <div style="font-size:13px;font-weight:600;color:var(--w)">${f.lbl}</div>
         </div>
-        <div style="font-size:13px;font-weight:700;color:var(--teal)">${f.val}</div>
+        <div style="font-size:14px;font-weight:700;color:var(--teal)">${f.val}</div>
       `;
       timesEl.appendChild(row);
     });
