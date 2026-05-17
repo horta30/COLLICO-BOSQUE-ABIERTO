@@ -59,7 +59,7 @@ COLLICO-BOSQUE-ABIERTO/
 
 ## 🗺️ Senderos del parque
 
-**14 senderos catalogados · 21.9 km de red total** (sin contar ripio)
+**15 senderos catalogados · 22.65 km de red total** (sin contar ripio)
 
 | # | Sendero | Distancia | Desnivel | D+/km | Dificultad | Disciplinas |
 |---|---|---|---|---|---|---|
@@ -77,6 +77,7 @@ COLLICO-BOSQUE-ABIERTO/
 | 12 | 🐰 Conejo | 0.63 km | 35m | 0 | Fácil | TR · XC · DH |
 | 13 | 🔥 Lalo Cura | 1.12 km | 174m ↓ | 7.6 | Técnico DH | DH |
 | 14 | 🌀 Suaveton | 0.66 km | 72m | 54.3 | Moderado | TR · XC |
+| 15 | ⚡ Suavetona Lex One | 0.75 km | 95m | 20.1 | Difícil | TR |
 
 ### Disciplinas
 

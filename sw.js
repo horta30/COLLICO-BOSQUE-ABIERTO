@@ -18,7 +18,7 @@
 //   • iOS no permite background sync → cache solo se actualiza con la app abierta
 // =============================================================================
 
-const CACHE_VERSION   = 'cba-v1';        // Cambiar para invalidar todo el cache
+const CACHE_VERSION   = 'cba-v2';        // Cambiar para invalidar todo el cache (v2: + Suavetona Lex One)
 const APP_CACHE       = `${CACHE_VERSION}-app`;
 const TILES_CACHE     = `${CACHE_VERSION}-tiles`;
 
