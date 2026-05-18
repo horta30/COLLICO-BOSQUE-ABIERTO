@@ -112,7 +112,12 @@
   </style>
 </head>
 <body>
-<script>if (sessionStorage.getItem('collico_v')) window.location.replace('mapa.html');</script>
+<script>
+  // Saltar el auto-redirect al mapa cuando estás en modo dev (?dev=1 o ?demo=1)
+  if (!/[?&](dev|demo)=1/.test(location.search) && sessionStorage.getItem('collico_v')) {
+    window.location.replace('mapa.html');
+  }
+</script>
 
 <section class="hero">
   <div class="hero-bg"></div>
@@ -244,5 +249,8 @@
   `).join('');
 })();
 </script>
+
+<!-- Dev nav: activar con ?dev=1 en la URL -->
+<script src="assets/devnav.js"></script>
 </body>
 </html>

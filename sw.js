@@ -18,7 +18,7 @@
 //   • iOS no permite background sync → cache solo se actualiza con la app abierta
 // =============================================================================
 
-const CACHE_VERSION   = 'cba-v8';        // Cambiar para invalidar todo el cache (v8: social image + Open Graph meta tags)
+const CACHE_VERSION   = 'cba-v9';        // Cambiar para invalidar todo el cache (v9: dev nav widget ?dev=1)
 const APP_CACHE       = `${CACHE_VERSION}-app`;
 const TILES_CACHE     = `${CACHE_VERSION}-tiles`;
 
@@ -34,6 +34,7 @@ const APP_SHELL = [
   './assets/senderos.js',
   './assets/cc.js',
   './assets/offline.js',
+  './assets/devnav.js',
   // CDN críticos (MapLibre + fuentes) — se cachean al primer fetch
   'https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css',
   'https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js'
