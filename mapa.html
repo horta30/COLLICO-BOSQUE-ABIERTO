@@ -44,7 +44,15 @@
 
     #map { position:absolute; inset:0; }
     .maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right,
-    .maplibregl-ctrl-top-left,.maplibregl-ctrl-top-right { display:none !important; }
+    .maplibregl-ctrl-top-left { display:none !important; }
+    /* Ocultar TODOS los controls de top-right por defecto, excepto la brújula que se reposiciona */
+    .maplibregl-ctrl-top-right { display:none !important; }
+    /* Brújula custom: arriba del todo de la columna bottom-right */
+    .compass-wrap { position:absolute; bottom:218px; right:14px; z-index:10; }
+    .compass-wrap .maplibregl-ctrl { background:var(--ui); border:1px solid var(--line); border-radius:10px; backdrop-filter:blur(12px); margin:0; box-shadow:none; overflow:hidden; }
+    .compass-wrap .maplibregl-ctrl-compass { width:38px; height:38px; border-radius:10px; background:transparent; }
+    .compass-wrap .maplibregl-ctrl-compass .maplibregl-ctrl-icon { filter:brightness(0) invert(1) opacity(.75); }
+    .compass-wrap .maplibregl-ctrl-compass:hover .maplibregl-ctrl-icon { opacity:1; }
 
     /* ════════ ENTRY OVERLAY (primer toque obligatorio) ════════ */
     .entry-overlay {
@@ -358,17 +366,28 @@ const map = new maplibregl.Map({
   },
   center: PARQUE_CONFIG.centro,
   zoom: PARQUE_CONFIG.zoom_inicial,
-  bearing: 0,           // Norte siempre arriba
-  pitch: 0,             // Vista 2D plana (sin inclinación)
-  dragRotate: false,    // Bloquea rotación con drag
-  pitchWithRotate: false,
-  touchPitch: false,    // Bloquea inclinación con gesto multi-touch
+  bearing: 0,           // Inicia con norte arriba (el usuario puede rotar libre)
+  pitch: 0,
   maxZoom:19, minZoom:10,
   attributionControl: false
 });
 
-// Desactivar gestos rotacionales del touch (rotación 2 dedos)
-map.touchZoomRotate.disableRotation();
+// Brújula custom (vuelve a norte al hacer tap, rota libre con dos dedos)
+const compassWrap = document.createElement('div');
+compassWrap.className = 'compass-wrap';
+document.body.appendChild(compassWrap);
+
+const compassCtrl = new maplibregl.NavigationControl({
+  showCompass: true,
+  showZoom: false,
+  visualizePitch: false
+});
+map.addControl(compassCtrl, 'top-right');
+// Mover el botón de la brújula al wrapper custom
+setTimeout(() => {
+  const compassEl = document.querySelector('.maplibregl-ctrl-top-right .maplibregl-ctrl-compass')?.closest('.maplibregl-ctrl');
+  if (compassEl) compassWrap.appendChild(compassEl);
+}, 50);
 
 function setMapStyle(style, btn) {
   document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('on'));
