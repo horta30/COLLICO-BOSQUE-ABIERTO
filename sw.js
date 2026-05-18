@@ -18,7 +18,7 @@
 //   • iOS no permite background sync → cache solo se actualiza con la app abierta
 // =============================================================================
 
-const CACHE_VERSION   = 'cba-v9';        // Cambiar para invalidar todo el cache (v9: dev nav widget ?dev=1)
+const CACHE_VERSION   = 'cba-v10';       // Cambiar para invalidar todo el cache (v10: bearing 0° bloqueado + POIs 30% más chicos)
 const APP_CACHE       = `${CACHE_VERSION}-app`;
 const TILES_CACHE     = `${CACHE_VERSION}-tiles`;
 
