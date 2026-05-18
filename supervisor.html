@@ -274,7 +274,38 @@ function centrarMapa() {
 
 // ─── SUPERVISOR LOGIC ──────────────────────────────────────
 const visitantesMarkers = {};
+const visitantesTracks = {};   // sourceId → layer activo por visitante
 const TIMEOUT_INACTIVO = 5 * 60 * 1000;   // 5 min sin actualizar = inactivo
+
+function _trackSourceId(id)  { return 'track-' + id; }
+function _trackLayerId(id)   { return 'track-line-' + id; }
+
+function _upsertTrack(id, track) {
+  if (!track || track.length < 2) return;
+  const coords = track.map(p => [p.lng, p.lat]);
+  const geojson = { type:'Feature', geometry:{ type:'LineString', coordinates:coords } };
+  const srcId   = _trackSourceId(id);
+  const layerId = _trackLayerId(id);
+  if (map.getSource(srcId)) {
+    map.getSource(srcId).setData(geojson);
+  } else {
+    map.addSource(srcId, { type:'geojson', data:geojson });
+    map.addLayer({
+      id: layerId, type:'line', source: srcId,
+      layout:{ 'line-join':'round', 'line-cap':'round' },
+      paint:{ 'line-color':'#00e5ff', 'line-width':2.5, 'line-opacity':0.7 }
+    });
+    visitantesTracks[id] = true;
+  }
+}
+
+function _removeTrack(id) {
+  const srcId   = _trackSourceId(id);
+  const layerId = _trackLayerId(id);
+  if (map.getLayer(layerId))  map.removeLayer(layerId);
+  if (map.getSource(srcId))   map.removeSource(srcId);
+  delete visitantesTracks[id];
+}
 
 function initSupervisor() {
   document.getElementById('tb-sub').textContent = PARQUE_CONFIG.subtitulo + ' · Tiempo real';
@@ -305,17 +336,21 @@ function renderVisitantes(data) {
   document.getElementById('visitor-count').textContent = count;
   document.getElementById('vp-count').textContent = count + ' activo' + (count !== 1 ? 's' : '');
 
-  // Limpiar markers viejos
+  // Limpiar markers y tracks de inactivos
   Object.keys(visitantesMarkers).forEach(id => {
     if (!activos[id]) {
       visitantesMarkers[id].remove();
       delete visitantesMarkers[id];
+      _removeTrack(id);
     }
   });
 
-  // Crear / actualizar markers
+  // Crear / actualizar markers y tracks
   Object.entries(activos).forEach(([id, v]) => {
     if (!v.lat || !v.lng) return;
+    // Track (polyline del recorrido)
+    if (v.track && v.track.length >= 2) _upsertTrack(id, v.track);
+    // Marker (posición actual)
     if (visitantesMarkers[id]) {
       visitantesMarkers[id].setLngLat([v.lng, v.lat]);
     } else {
@@ -341,13 +376,25 @@ function renderVisitantes(data) {
   Object.entries(activos).forEach(([id, v]) => {
     const edad = Math.floor((Date.now() - v._ts) / 1000);
     const tiempoStr = edad < 60 ? 'hace ' + edad + 's' : 'hace ' + Math.floor(edad/60) + ' min';
+    // Calcular distancia total del track si existe
+    let distStr = '';
+    if (v.track && v.track.length >= 2) {
+      let d = 0;
+      for (let i = 1; i < v.track.length; i++) {
+        const R = 6371000, p = v.track[i-1], q = v.track[i];
+        const dLat = (q.lat-p.lat)*Math.PI/180, dLng = (q.lng-p.lng)*Math.PI/180;
+        const a = Math.sin(dLat/2)**2 + Math.cos(p.lat*Math.PI/180)*Math.cos(q.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+        d += R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      }
+      distStr = ' · ' + (d >= 1000 ? (d/1000).toFixed(1)+'km' : Math.round(d)+'m');
+    }
     const row = document.createElement('div');
     row.className = 'visitor-row';
     row.innerHTML = `
       <div class="v-avatar">🧑</div>
       <div class="v-info">
         <div class="v-nombre">${v.nombre || 'Visitante'}</div>
-        <div class="v-meta">${v.email || '—'} · ${tiempoStr}</div>
+        <div class="v-meta">${v.email || '—'} · ${tiempoStr}${distStr}</div>
       </div>
       <div class="v-status">
         <div class="v-dot active"></div>

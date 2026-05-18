@@ -340,7 +340,9 @@ const S = {
   disc: 'ALL', gps: false,
   lat: null, lng: null, watchId: null, marker: null,
   notifKey: null, panelOpen: false,
-  planOpen: false, rutaActiva: null
+  planOpen: false, rutaActiva: null,
+  track: [],          // historial de puntos GPS acumulados localmente
+  lastTrackTs: 0      // timestamp del último punto agregado al track
 };
 
 
@@ -890,7 +892,8 @@ function publishGPS(lat, lng, acc) {
       email:  v.email  || '',
       lat, lng,
       acc: Math.round(acc),
-      ts: Date.now()
+      ts: Date.now(),
+      track: S.track   // historial completo acumulado localmente
     });
   } catch(e) { console.warn('GPS publish:', e); }
 }
@@ -919,6 +922,12 @@ function stopGPS() {
   if (S.marker) { S.marker.remove(); S.marker=null; }
   document.getElementById('gps-btn').classList.remove('on');
   document.getElementById('tb-sub').textContent = `${PARQUE_CONFIG.subtitulo} · ${totalSend} senderos · ${totalKm} km`;
+  // Limpiar historial local al cerrar sesión GPS
+  try {
+    const v = JSON.parse(sessionStorage.getItem('collico_v') || '{}');
+    if (v.uid) localStorage.removeItem('cba_track_' + v.uid);
+  } catch(e) {}
+  S.track = []; S.lastTrackTs = 0;
 }
 
 function onPos(pos) {
@@ -931,6 +940,20 @@ function onPos(pos) {
     S.marker.setLngLat([lng,lat]);
   }
   document.getElementById('tb-sub').textContent = 'GPS activo · ±'+Math.round(acc)+'m';
+
+  // Acumular punto en el historial (throttle: 1 punto cada 15s, máx 500 pts)
+  const now = Date.now();
+  if (now - S.lastTrackTs >= 15000) {
+    if (S.track.length >= 500) S.track.shift(); // rotar si excede límite
+    S.track.push({ lat, lng, ts: now });
+    S.lastTrackTs = now;
+    // Persistir en localStorage como respaldo ante recarga o cierre
+    try {
+      const v = JSON.parse(sessionStorage.getItem('collico_v') || '{}');
+      if (v.uid) localStorage.setItem('cba_track_' + v.uid, JSON.stringify(S.track));
+    } catch(e) {}
+  }
+
   publishGPS(lat, lng, acc);
 
   // Notificación lateral (sistema previo, radio amplio)
@@ -1027,6 +1050,20 @@ async function startEntry() {
 
   // 4. GPS — pedir permiso (esto SÍ requiere gesto del usuario en algunos browsers)
   startGPS();
+
+  // Restaurar track previo desde localStorage (por si el usuario recargó la página)
+  try {
+    const v = JSON.parse(sessionStorage.getItem('collico_v') || '{}');
+    if (v.uid) {
+      const saved = localStorage.getItem('cba_track_' + v.uid);
+      if (saved) S.track = JSON.parse(saved);
+    }
+  } catch(e) {}
+
+  // Cuando vuelve la señal, publicar inmediatamente con el track acumulado
+  window.addEventListener('online', () => {
+    if (S.gps && S.lat && S.lng) publishGPS(S.lat, S.lng, 0);
+  });
 
   // 5. Firebase monitor (publicación en vivo)
   if (window._firebaseReady) initFirebaseMonitor();
