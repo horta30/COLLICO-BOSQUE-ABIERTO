@@ -53,6 +53,37 @@
     .compass-wrap .maplibregl-ctrl-compass { width:38px; height:38px; border-radius:10px; background:transparent; }
     .compass-wrap .maplibregl-ctrl-compass .maplibregl-ctrl-icon { filter:brightness(0) invert(1) opacity(.75); }
     .compass-wrap .maplibregl-ctrl-compass:hover .maplibregl-ctrl-icon { opacity:1; }
+    
+    /* === LABELS DE POIs / Áreas críticas / Sub-segmentos: ocultos por default === */
+    /* Aparecen en hover (desktop) o cuando tienen .show (después de tap mobile) */
+    .poi-wrap, .area-wrap, .subseg-wrap {
+      display:flex; flex-direction:column; align-items:center;
+      cursor:pointer; transition:transform .15s;
+    }
+    .poi-lbl, .area-lbl, .subseg-lbl {
+      font-family:Inter,sans-serif; color:#fff;
+      background:rgba(8,12,10,0.85); backdrop-filter:blur(4px);
+      padding:1.5px 5px; border-radius:5px; white-space:nowrap;
+      letter-spacing:0.3px; border:1px solid rgba(255,255,255,0.12);
+      box-shadow:0 2px 6px rgba(0,0,0,.4);
+      opacity:0; pointer-events:none;
+      transform:translateY(-2px);
+      transition:opacity .15s, transform .15s;
+      margin-top:3px;
+    }
+    .poi-lbl { font-size:9px; font-weight:700; }
+    .area-lbl { font-size:9px; font-weight:700; }
+    .subseg-lbl { font-size:9px; font-weight:700; background:rgba(167,139,250,.9); margin-top:0; }
+    /* Hover en desktop: muestra el label */
+    .poi-wrap:hover .poi-lbl,
+    .area-wrap:hover .area-lbl,
+    .subseg-wrap:hover .subseg-lbl,
+    /* Estado .show: activado por tap en mobile, persiste hasta otro tap */
+    .poi-wrap.show .poi-lbl,
+    .area-wrap.show .area-lbl,
+    .subseg-wrap.show .subseg-lbl {
+      opacity:1; transform:translateY(0);
+    }
 
     /* ════════ ENTRY OVERLAY (primer toque obligatorio) ════════ */
     .entry-overlay {
@@ -365,7 +396,7 @@ const map = new maplibregl.Map({
     layers: [{ id:'base-layer', type:'raster', source:'base' }]
   },
   center: PARQUE_CONFIG.centro,
-  zoom: PARQUE_CONFIG.zoom_inicial,
+  zoom: (window.innerWidth < 700 ? (PARQUE_CONFIG.zoom_mobile || 14.0) : PARQUE_CONFIG.zoom_inicial),
   bearing: 0,           // Inicia con norte arriba (el usuario puede rotar libre)
   pitch: 0,
   maxZoom:19, minZoom:10,
@@ -406,6 +437,13 @@ map.on('load', () => {
   initRutaLayer();
   buildPlanList();
   initFromURL();
+});
+
+// Tap en el fondo del mapa cierra cualquier label abierto (mobile UX)
+map.on('click', (e) => {
+  // Si el click vino sobre un marker, los handlers individuales ya lo manejaron.
+  // Este handler solo limpia cuando el tap fue sobre el mapa "vacío".
+  document.querySelectorAll('.poi-wrap.show, .area-wrap.show, .subseg-wrap.show').forEach(w => w.classList.remove('show'));
 });
 
 
@@ -450,11 +488,28 @@ function loadSubsegmentos() {
     });
     // Etiqueta flotante con nombre del sub-segmento (al medio del slice)
     const mid = coords[Math.floor(coords.length/2)];
-    const el = document.createElement('div');
-    el.style.cssText = 'font-family:Inter,sans-serif;font-size:9px;font-weight:700;background:rgba(167,139,250,.85);color:#fff;padding:2px 7px;border-radius:6px;white-space:nowrap;border:1px solid rgba(255,255,255,.15);box-shadow:0 2px 6px rgba(0,0,0,.4);cursor:pointer;';
-    el.textContent = sub.nombre;
-    el.addEventListener('click', () => showNotif('🌀', sub.nombre, 'Sub-tramo de Collico 1 · '+sub.dist_km+' km', '#A78BFA'));
-    new maplibregl.Marker({ element:el, anchor:'center' }).setLngLat(mid).addTo(map);
+    const wrap = document.createElement('div');
+    wrap.className = 'subseg-wrap';
+    
+    // Punto pequeño morado (siempre visible)
+    const dot = document.createElement('div');
+    dot.style.cssText = 'width:8px;height:8px;border-radius:50%;background:#A78BFA;border:1.5px solid rgba(255,255,255,.9);box-shadow:0 2px 4px rgba(0,0,0,.5);';
+    
+    // Label (oculto hasta hover/tap)
+    const lbl = document.createElement('div');
+    lbl.className = 'subseg-lbl';
+    lbl.textContent = sub.nombre;
+    
+    wrap.appendChild(dot);
+    wrap.appendChild(lbl);
+    wrap.addEventListener('click', () => {
+      document.querySelectorAll('.poi-wrap.show, .area-wrap.show, .subseg-wrap.show').forEach(w => {
+        if (w !== wrap) w.classList.remove('show');
+      });
+      wrap.classList.toggle('show');
+      showNotif('🌀', sub.nombre, 'Sub-tramo de Collico 1 · '+sub.dist_km+' km', '#A78BFA');
+    });
+    new maplibregl.Marker({ element:wrap, anchor:'top' }).setLngLat(mid).addTo(map);
   });
 }
 
@@ -478,7 +533,7 @@ function loadPOIs() {
   // POIs específicos del KMZ depurado (Cumbre, Miradores, Cascada)
   POIS.forEach(poi => {
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:transform .15s;';
+    wrap.className = 'poi-wrap';
 
     // Emoji por nombre
     let emoji = '📍', color = '#3EC9A7';
@@ -492,13 +547,18 @@ function loadPOIs() {
     ic.textContent = emoji;
 
     const lbl = document.createElement('div');
-    lbl.style.cssText = 'font-family:Inter,sans-serif;font-size:9px;font-weight:700;color:#fff;background:rgba(8,12,10,0.75);backdrop-filter:blur(4px);padding:1.5px 5px;border-radius:5px;white-space:nowrap;letter-spacing:0.3px;border:1px solid rgba(255,255,255,0.12);';
+    lbl.className = 'poi-lbl';
     lbl.textContent = poi.nombre;
 
     wrap.appendChild(ic);
     wrap.appendChild(lbl);
 
     wrap.addEventListener('click', () => {
+      // Alterna visibilidad del label (cierra otros abiertos)
+      document.querySelectorAll('.poi-wrap.show, .area-wrap.show, .subseg-wrap.show').forEach(w => {
+        if (w !== wrap) w.classList.remove('show');
+      });
+      wrap.classList.toggle('show');
       wrap.style.transform = 'scale(1.15)';
       setTimeout(() => wrap.style.transform = 'scale(1)', 300);
       showNotif(emoji, poi.nombre, 'Punto de interés del parque', color);
@@ -517,7 +577,7 @@ function loadAreasCriticas() {
   AREAS_CRITICAS.forEach(area => {
     // Marker discreto tipo POI de cruce — punto azul pequeño con relieve
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:transform .15s;';
+    wrap.className = 'area-wrap';
     
     // Punto azul con efecto 3D (gradiente radial + sombras)
     const ic = document.createElement('div');
@@ -532,12 +592,19 @@ function loadAreasCriticas() {
     `;
     
     const lbl = document.createElement('div');
-    lbl.style.cssText = `font-family:Inter,sans-serif;font-size:9px;font-weight:700;color:#fff;background:rgba(8,12,10,0.75);backdrop-filter:blur(4px);padding:2px 6px;border-radius:5px;white-space:nowrap;letter-spacing:.3px;border:1px solid rgba(255,255,255,.12);`;
+    lbl.className = 'area-lbl';
     lbl.textContent = area.nombre;
     
     wrap.appendChild(ic);
     wrap.appendChild(lbl);
-    wrap.addEventListener('click', () => openAreaPanel(area.id));
+    wrap.addEventListener('click', () => {
+      // Cierra otros labels abiertos
+      document.querySelectorAll('.poi-wrap.show, .area-wrap.show, .subseg-wrap.show').forEach(w => {
+        if (w !== wrap) w.classList.remove('show');
+      });
+      wrap.classList.add('show');
+      openAreaPanel(area.id);
+    });
     
     new maplibregl.Marker({ element: wrap, anchor: 'top' }).setLngLat(area.centro).addTo(map);
   });
@@ -999,10 +1066,51 @@ function hideNotif() { document.getElementById('notif').classList.remove('on'); 
 // =============================================================================
 // UTILS
 // =============================================================================
-function centrar() {
-  if (S.lng && S.lat) map.flyTo({ center:[S.lng,S.lat], zoom:15, duration:600 });
-  else map.flyTo({ center: PARQUE_CONFIG.centro, zoom: PARQUE_CONFIG.zoom_inicial, duration:600 });
+// Helper: zoom inicial según viewport (mobile vs desktop)
+function _zoomInicial() {
+  return window.innerWidth < 700 ? (PARQUE_CONFIG.zoom_mobile || 14.0) : PARQUE_CONFIG.zoom_inicial;
 }
+
+// "Centrar" (botón ⌖): si hay GPS activo, centra en tu ubicación; si no, vuelve a la vista inicial del parque (norte arriba)
+function centrar() {
+  if (S.lng && S.lat) {
+    map.flyTo({ center:[S.lng,S.lat], zoom:15, bearing:0, duration:600 });
+  } else {
+    map.flyTo({
+      center: PARQUE_CONFIG.centro,
+      zoom:   _zoomInicial(),
+      bearing: PARQUE_CONFIG.bearing_inicial || 0,
+      pitch:  0,
+      duration:600
+    });
+  }
+}
+
+// Long-press en ⌖ → fuerza vista inicial del parque (útil después de zoomear y perder referencia)
+(function bindLongPressCentrar() {
+  const btn = document.querySelectorAll('.ctrl-btn')[2];  // el ⌖ (3er botón)
+  if (!btn) return;
+  let pressTimer = null;
+  const start = () => {
+    pressTimer = setTimeout(() => {
+      map.flyTo({
+        center: PARQUE_CONFIG.centro,
+        zoom:   _zoomInicial(),
+        bearing: PARQUE_CONFIG.bearing_inicial || 0,
+        pitch:  0,
+        duration:700
+      });
+      pressTimer = null;
+    }, 600);
+  };
+  const cancel = () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
+  btn.addEventListener('touchstart', start, { passive:true });
+  btn.addEventListener('touchend',   cancel);
+  btn.addEventListener('touchcancel', cancel);
+  btn.addEventListener('mousedown',  start);
+  btn.addEventListener('mouseup',    cancel);
+  btn.addEventListener('mouseleave', cancel);
+})();
 
 function initFromURL() {
   const p = new URLSearchParams(window.location.search);

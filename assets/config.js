@@ -25,8 +25,12 @@ const PARQUE_CONFIG = {
   locKey:    'collico',
 
   // --- Geografía del parque ---
-  centro:        [-73.185, -39.825],         // [lng, lat] — centro del mapa al cargar
-  zoom_inicial:  13,
+  // centro/zoom calibrados a la vista N-S del parque (franja vertical desde Cumbre arriba hasta Mirador Kunstmann abajo)
+  // El bearing inicial siempre es 0° (norte arriba) — el usuario puede rotar libre y volver con tap a la brújula
+  centro:        [-73.180, -39.8265],        // [lng, lat] — centro vertical entre Cumbre y Kunstmann
+  zoom_inicial:  13.8,                       // desktop: muestra la franja completa con margen
+  zoom_mobile:   14.0,                       // mobile: zoom ligeramente mayor para llenar viewport vertical
+  bearing_inicial: 0,                        // norte arriba
   totem:         { lng: -73.20285, lat: -39.81886 },
 
   // Bounding box — usado por el Service Worker para pre-cachear tiles offline
