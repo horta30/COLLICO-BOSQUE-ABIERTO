@@ -850,7 +850,12 @@ function renderRuta(destinoId) {
   if (geojson.features.length > 0) {
     const allCoords = geojson.features.flatMap(f => f.geometry.coordinates);
     const bounds = allCoords.reduce((b,c) => b.extend(c), new maplibregl.LngLatBounds(allCoords[0], allCoords[0]));
-    map.fitBounds(bounds, { padding:{ top:140, bottom:280, left:20, right:20 }, duration:700 });
+    map.fitBounds(bounds, {
+      padding:{ top:140, bottom:280, left:20, right:20 },
+      duration:700,
+      bearing: map.getBearing(),
+      pitch:   map.getPitch()
+    });
   }
 }
 
@@ -941,12 +946,25 @@ function openPanel(id) {
   S.panelOpen = true;
 
   const bounds = s.coords.reduce((b,c) => b.extend(c), new maplibregl.LngLatBounds(s.coords[0],s.coords[0]));
-  map.fitBounds(bounds, { padding:{top:130,bottom:340,left:20,right:20}, duration:600 });
+  map.fitBounds(bounds, {
+    padding:{top:130,bottom:340,left:20,right:20},
+    duration:600,
+    bearing: map.getBearing(),    // mantiene la orientación actual
+    pitch:   map.getPitch()       // mantiene el tilt actual
+  });
 }
 
 function closePanel() {
   document.getElementById('panel').classList.remove('open');
   S.panelOpen = false;
+  // Restaurar vista original del parque (centro + zoom + bearing + pitch iniciales)
+  map.flyTo({
+    center: PARQUE_CONFIG.centro,
+    zoom:   _zoomInicial(),
+    bearing: (PARQUE_CONFIG.bearing_inicial !== undefined ? PARQUE_CONFIG.bearing_inicial : 0),
+    pitch:   (PARQUE_CONFIG.pitch_inicial   !== undefined ? PARQUE_CONFIG.pitch_inicial   : 0),
+    duration: 700
+  });
 }
 
 map.on('click', e => {

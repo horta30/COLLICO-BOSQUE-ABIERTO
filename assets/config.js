@@ -34,7 +34,7 @@ const PARQUE_CONFIG = {
   centro:        [-73.180, -39.8265],        // [lng, lat] — centro vertical entre Cumbre y Kunstmann
   zoom_inicial:  13.8,                       // desktop: muestra la franja completa con margen
   zoom_mobile:   13.5,                       // mobile: alejado para mostrar TODO el parque + contexto Valdivia
-  bearing_inicial: 65,                       // ajuste de Pablo · norte hacia abajo-derecha
+  bearing_inicial: 85,                       // ajuste de Pablo (v17)
   pitch_inicial:   30,                       // tilt 3D moderado
   totem:         { lng: -73.20285, lat: -39.81886 },
 
