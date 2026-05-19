@@ -25,12 +25,16 @@ const PARQUE_CONFIG = {
   locKey:    'collico',
 
   // --- Geografía del parque ---
-  // centro/zoom calibrados a la vista N-S del parque (franja vertical desde Cumbre arriba hasta Mirador Kunstmann abajo)
-  // El bearing inicial siempre es 0° (norte arriba) — el usuario puede rotar libre y volver con tap a la brújula
+  // VISTA INICIAL DEL DEPLOY (calibrada a "Vista SI" de Pablo):
+  //   El parque es una franja N-S; la vista canónica norte-arriba lo hace ver "muy vertical".
+  //   Por eso rotamos el bearing ~35° (norte queda arriba-izquierda) + pitch 50° (perspectiva 3D)
+  //   → la franja queda en diagonal natural y se ve el horizonte hacia el SE (Valdivia)
+  // El usuario puede rotar libre con 2 dedos y volver a esta vista con el botón ⌖
   centro:        [-73.180, -39.8265],        // [lng, lat] — centro vertical entre Cumbre y Kunstmann
   zoom_inicial:  13.8,                       // desktop: muestra la franja completa con margen
   zoom_mobile:   14.0,                       // mobile: zoom ligeramente mayor para llenar viewport vertical
-  bearing_inicial: 0,                        // norte arriba
+  bearing_inicial: 35,                       // norte queda hacia arriba-izquierda
+  pitch_inicial:   50,                       // inclinación 3D moderada (perspectiva)
   totem:         { lng: -73.20285, lat: -39.81886 },
 
   // Bounding box — usado por el Service Worker para pre-cachear tiles offline

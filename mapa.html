@@ -397,9 +397,10 @@ const map = new maplibregl.Map({
   },
   center: PARQUE_CONFIG.centro,
   zoom: (window.innerWidth < 700 ? (PARQUE_CONFIG.zoom_mobile || 14.0) : PARQUE_CONFIG.zoom_inicial),
-  bearing: 0,           // Inicia con norte arriba (el usuario puede rotar libre)
-  pitch: 0,
+  bearing: (PARQUE_CONFIG.bearing_inicial !== undefined ? PARQUE_CONFIG.bearing_inicial : 0),
+  pitch:   (PARQUE_CONFIG.pitch_inicial   !== undefined ? PARQUE_CONFIG.pitch_inicial   : 0),
   maxZoom:19, minZoom:10,
+  maxPitch:60,        // pitch máximo 60° (límite estándar MapLibre)
   attributionControl: false
 });
 
@@ -1071,35 +1072,43 @@ function _zoomInicial() {
   return window.innerWidth < 700 ? (PARQUE_CONFIG.zoom_mobile || 14.0) : PARQUE_CONFIG.zoom_inicial;
 }
 
-// "Centrar" (botón ⌖): si hay GPS activo, centra en tu ubicación; si no, vuelve a la vista inicial del parque (norte arriba)
+// Vista inicial completa del parque (centro + zoom + bearing + pitch)
+function _vistaInicial() {
+  return {
+    center: PARQUE_CONFIG.centro,
+    zoom:   _zoomInicial(),
+    bearing: (PARQUE_CONFIG.bearing_inicial !== undefined ? PARQUE_CONFIG.bearing_inicial : 0),
+    pitch:   (PARQUE_CONFIG.pitch_inicial   !== undefined ? PARQUE_CONFIG.pitch_inicial   : 0)
+  };
+}
+
+// "Centrar" (botón ⌖): 
+//   - tap normal CON GPS: centra en tu ubicación
+//   - tap normal SIN GPS: vuelve a vista inicial del parque
+//   - long-press (600ms): vuelve a vista inicial SIEMPRE (aunque tengas GPS)
 function centrar() {
   if (S.lng && S.lat) {
-    map.flyTo({ center:[S.lng,S.lat], zoom:15, bearing:0, duration:600 });
+    // Centra en GPS pero mantiene bearing/pitch actuales (no rompe la orientación que el usuario eligió)
+    map.flyTo({ center:[S.lng,S.lat], zoom:15, duration:600 });
   } else {
-    map.flyTo({
-      center: PARQUE_CONFIG.centro,
-      zoom:   _zoomInicial(),
-      bearing: PARQUE_CONFIG.bearing_inicial || 0,
-      pitch:  0,
-      duration:600
-    });
+    map.flyTo({ ..._vistaInicial(), duration:600 });
   }
 }
 
-// Long-press en ⌖ → fuerza vista inicial del parque (útil después de zoomear y perder referencia)
+// Long-press en ⌖ → fuerza vista inicial completa (útil si el usuario se desorientó)
 (function bindLongPressCentrar() {
   const btn = document.querySelectorAll('.ctrl-btn')[2];  // el ⌖ (3er botón)
   if (!btn) return;
   let pressTimer = null;
+  let pressed = false;
   const start = () => {
+    pressed = false;
     pressTimer = setTimeout(() => {
-      map.flyTo({
-        center: PARQUE_CONFIG.centro,
-        zoom:   _zoomInicial(),
-        bearing: PARQUE_CONFIG.bearing_inicial || 0,
-        pitch:  0,
-        duration:700
-      });
+      pressed = true;
+      map.flyTo({ ..._vistaInicial(), duration:700 });
+      // Feedback visual: brillo
+      btn.style.background = 'rgba(62,201,167,0.4)';
+      setTimeout(() => btn.style.background = '', 400);
       pressTimer = null;
     }, 600);
   };
