@@ -32,9 +32,9 @@ const PARQUE_CONFIG = {
   //   pitch 30° → tilt 3D moderado para sensación de relieve sin distorsionar íconos
   // El usuario puede rotar libre con 2 dedos y volver a esta vista con long-press en ⌖
   centro:        [-73.180, -39.8265],        // [lng, lat] — centro vertical entre Cumbre y Kunstmann
-  zoom_inicial:  13.8,                       // desktop: muestra la franja completa con margen
-  zoom_mobile:   13.5,                       // mobile: alejado para mostrar TODO el parque + contexto Valdivia
-  bearing_inicial: 85,                       // ajuste de Pablo (v17)
+  zoom_inicial:  11.73,                       // desktop: 15% más lejos / más alto (era 13.8)
+  zoom_mobile:   11.48,                       // mobile: 15% más lejos / más alto (era 13.5)
+  bearing_inicial: 100,                       // ajuste de Pablo (v18)
   pitch_inicial:   30,                       // tilt 3D moderado
   totem:         { lng: -73.20285, lat: -39.81886 },
 
