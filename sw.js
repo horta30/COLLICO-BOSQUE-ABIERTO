@@ -18,7 +18,7 @@
 //   • iOS no permite background sync → cache solo se actualiza con la app abierta
 // =============================================================================
 
-const CACHE_VERSION   = 'cba-v15';       // Cambiar para invalidar todo el cache (v15: vista 3D — bearing 250° + pitch 30° + zoom mobile 13.5)
+const CACHE_VERSION   = 'cba-v16';       // Cambiar para invalidar todo el cache (v16: bearing 65°)
 const APP_CACHE       = `${CACHE_VERSION}-app`;
 const TILES_CACHE     = `${CACHE_VERSION}-tiles`;
 
