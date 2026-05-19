@@ -26,15 +26,16 @@ const PARQUE_CONFIG = {
 
   // --- Geografía del parque ---
   // VISTA INICIAL DEL DEPLOY (calibrada a "Vista SI" de Pablo):
-  //   El parque es una franja N-S; la vista canónica norte-arriba lo hace ver "muy vertical".
-  //   Por eso rotamos el bearing ~35° (norte queda arriba-izquierda) + pitch 50° (perspectiva 3D)
-  //   → la franja queda en diagonal natural y se ve el horizonte hacia el SE (Valdivia)
-  // El usuario puede rotar libre con 2 dedos y volver a esta vista con el botón ⌖
+  //   El parque es una franja NE-SW; vista calibrada para mostrarla en diagonal
+  //   con la Cumbre arriba y el Acceso Principal abajo.
+  //   bearing 250° → norte sale por abajo-izquierda (la cámara mira hacia el WSW)
+  //   pitch 30° → tilt 3D moderado para sensación de relieve sin distorsionar íconos
+  // El usuario puede rotar libre con 2 dedos y volver a esta vista con long-press en ⌖
   centro:        [-73.180, -39.8265],        // [lng, lat] — centro vertical entre Cumbre y Kunstmann
   zoom_inicial:  13.8,                       // desktop: muestra la franja completa con margen
-  zoom_mobile:   14.0,                       // mobile: zoom ligeramente mayor para llenar viewport vertical
-  bearing_inicial: 35,                       // norte queda hacia arriba-izquierda
-  pitch_inicial:   50,                       // inclinación 3D moderada (perspectiva)
+  zoom_mobile:   13.5,                       // mobile: alejado para mostrar TODO el parque + contexto Valdivia
+  bearing_inicial: 250,                      // norte sale por abajo-izquierda
+  pitch_inicial:   30,                       // tilt 3D moderado
   totem:         { lng: -73.20285, lat: -39.81886 },
 
   // Bounding box — usado por el Service Worker para pre-cachear tiles offline
