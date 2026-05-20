@@ -430,13 +430,13 @@ function setMapStyle(style, btn) {
 
 map.on('load', () => {
   loadSenderos();
-  loadSubsegmentos();
   loadTotem();
   loadPOIs();
   loadRipio();
   loadAreasCriticas();
   initRutaLayer();
   buildPlanList();
+  loadSubsegmentos();  // ÚLTIMO para que las líneas queden ENCIMA de senderos padre + ripio principal
   initFromURL();
 });
 
@@ -474,39 +474,50 @@ function loadSenderos() {
 }
 
 function loadSubsegmentos() {
-  // Sub-segmentos sobre Collico 1: dibujarlos con líneas guionadas más finas
-  // por encima del padre, con un color algo diferente para distinguirlos.
+  // Sub-segmentos sobre senderos padre: dibujarlos con líneas guionadas
+  // por encima del padre, con un color diferente para distinguirlos.
+  window._subMarkers = window._subMarkers || {};  // refs a wrappers para filtro
+  
   SUBSEGMENTOS.forEach(sub => {
     const coords = getSubsegmentoCoords(sub.id);
     if (!coords || coords.length < 2) return;
     
-    // Tramos de ripio: amarillo grava como Camino Principal de Ripio · línea más larga punteada
-    // Sub-segmentos normales: morado como antes
     const esRipio = sub.es_ripio === true;
     const colorLinea = esRipio ? '#F5C242' : '#A78BFA';
-    const dashArray  = esRipio ? [1.5, 1.5] : [2, 1.5];
-    const lineWidth  = esRipio ? 4 : 3;
+    const dashArray  = esRipio ? [2.5, 2] : [2, 1.5];
+    const lineWidth  = esRipio ? 6 : 3;
     
     const sourceId = 'sub-'+sub.id;
     const layerId  = 'sub-line-'+sub.id;
+    const glowId   = 'sub-glow-'+sub.id;
+    
     map.addSource(sourceId, { type:'geojson', data:{ type:'Feature', geometry:{ type:'LineString', coordinates:coords } } });
+    
+    // Tramos de ripio: glow detrás para destacar
+    if (esRipio) {
+      map.addLayer({
+        id: glowId, type:'line', source: sourceId,
+        layout:{'line-join':'round','line-cap':'round'},
+        paint:{ 'line-color': '#F5C242', 'line-width': 14, 'line-opacity': 0.25, 'line-blur': 4 }
+      });
+    }
+    
     map.addLayer({
       id: layerId, type:'line', source: sourceId,
       layout:{'line-join':'round','line-cap':'round'},
-      paint:{ 'line-color':colorLinea, 'line-width':lineWidth, 'line-opacity':0.95, 'line-dasharray':dashArray }
+      paint:{ 'line-color':colorLinea, 'line-width':lineWidth, 'line-opacity':0.98, 'line-dasharray':dashArray }
     });
+    
     // Etiqueta flotante con nombre del sub-segmento (al medio del slice)
     const mid = coords[Math.floor(coords.length/2)];
     const wrap = document.createElement('div');
     wrap.className = 'subseg-wrap';
     if (esRipio) wrap.classList.add('subseg-ripio');
     
-    // Punto pequeño (color según tipo)
     const dot = document.createElement('div');
     const colorDot = esRipio ? '#F5C242' : '#A78BFA';
     dot.style.cssText = `width:8px;height:8px;border-radius:50%;background:${colorDot};border:1.5px solid rgba(255,255,255,.9);box-shadow:0 2px 4px rgba(0,0,0,.5);`;
     
-    // Label (oculto hasta hover/tap)
     const lbl = document.createElement('div');
     lbl.className = 'subseg-lbl';
     lbl.textContent = sub.nombre;
@@ -523,12 +534,16 @@ function loadSubsegmentos() {
       });
       wrap.classList.toggle('show');
       const emoji = esRipio ? '🚜' : '🌀';
+      const padreNombre = sub.padre === 'collico1' ? 'Collico 1' : sub.padre === 'el_muro' ? 'El Muro' : sub.padre;
       const desc  = esRipio
-        ? 'Tramo de ripio en Collico 1 · '+sub.dist_km+' km'
+        ? 'Tramo de ripio en '+padreNombre+' · '+sub.dist_km+' km'
         : 'Sub-tramo de Collico 1 · '+sub.dist_km+' km';
       showNotif(emoji, sub.nombre, desc, colorDot);
     });
     new maplibregl.Marker({ element:wrap, anchor:'top' }).setLngLat(mid).addTo(map);
+    
+    // Guardar referencia para que filterByDisc pueda ocultar/mostrar el marker
+    window._subMarkers[sub.id] = wrap;
   });
 }
 
@@ -708,26 +723,27 @@ function loadRipio() {
 // =============================================================================
 function filterByDisc(disc) {
   // Senderos: ocultar/mostrar según disciplina
-  // Nota: Mirador del Puma y Mirador Kunstmann tienen disciplina ['RP','TR']
-  // → al filtrar RP, aparecen completos junto con el Camino Principal
   SENDEROS.forEach(s => {
-    // Camino Principal de Ripio se maneja en sus propias layers (ripio/ripio-glow)
-    if (s.id === 'camino_principal') return;
+    if (s.id === 'camino_principal') return;  // ripio principal se maneja en sus propias layers
     const v = (disc === 'ALL' || s.disciplinas.includes(disc)) ? 'visible' : 'none';
     if (map.getLayer('line-'+s.id)) map.setLayoutProperty('line-'+s.id,'visibility',v);
     if (map.getLayer('glow-'+s.id)) map.setLayoutProperty('glow-'+s.id,'visibility',v);
   });
-  // Sub-segmentos: filtrar por disciplinas (los de ripio aparecen con RP, los de trail con TR, etc.)
+  // Sub-segmentos: filtrar por disciplinas (incluye líneas, glow y MARKERS DOM)
   SUBSEGMENTOS.forEach(sub => {
     const v = (disc === 'ALL' || (sub.disciplinas || []).includes(disc)) ? 'visible' : 'none';
     if (map.getLayer('sub-line-'+sub.id)) map.setLayoutProperty('sub-line-'+sub.id,'visibility',v);
+    if (map.getLayer('sub-glow-'+sub.id)) map.setLayoutProperty('sub-glow-'+sub.id,'visibility',v);
+    // Marker DOM: el wrap que guardamos en loadSubsegmentos
+    const wrap = window._subMarkers && window._subMarkers[sub.id];
+    if (wrap) wrap.style.display = (v === 'visible') ? '' : 'none';
   });
   // Camino Principal de Ripio: visible en ALL o RP
   const showRipio = (disc === 'ALL' || disc === 'RP') ? 'visible' : 'none';
   if (map.getLayer('ripio'))      map.setLayoutProperty('ripio','visibility',showRipio);
   if (map.getLayer('ripio-glow')) map.setLayoutProperty('ripio-glow','visibility',showRipio);
   
-  console.log(`[filtro ${disc}] aplicado · ripio: ${showRipio}`);
+  console.log(`[filtro ${disc}] aplicado · ripio principal: ${showRipio}`);
 }
 
 function setDisc(disc, btn) {
