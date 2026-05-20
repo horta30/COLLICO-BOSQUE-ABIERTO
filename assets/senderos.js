@@ -1,7 +1,15 @@
 // =============================================================================
-// COLLICO BOSQUE ABIERTO — senderos.js v2.4
-// FUENTE ÚNICA DE VERDAD · 15 senderos + 3 sub-segmentos · Métricas reales
+// COLLICO BOSQUE ABIERTO — senderos.js v2.5
+// FUENTE ÚNICA DE VERDAD · 15 senderos + 6 sub-segmentos · Métricas reales
 // 
+// v2.5 (May 2026):
+//   • + 3 sub-segmentos de RIPIO en Collico 1 (KMZ TRAMOS RIPIO COLLICO 1)
+//     - Tramo 1: 0.87 km (idx 224→262)
+//     - Tramo 2: 0.14 km (idx 371→379)
+//     - Tramo 3: 0.26 km (idx 436→450)
+//   • Total ripio en Collico 1: 1.27 km (~26% del sendero)
+//   • Color amarillo grava como Camino Principal de Ripio · responde al filtro RP
+//
 // v2.4 (May 2026):
 //   • Bifurcación Cascada: textos reescritos para dejar claro que es DOBLAR a la
 //     derecha EN EL PUNTO de la bifurcación (a ~80m del inicio), no que el sendero
@@ -978,6 +986,52 @@ const SUBSEGMENTOS = [
     invertir:  true,
     dist_km:   0.71,
     disciplinas: ['TR']
+  },
+  // --- Tramos de RIPIO dentro de Collico 1 (KMZ Pablo May 2026) ---
+  {
+    id: 'ripio_c1_t1',
+    nombre: "Ripio Tramo 1",
+    padre: 'collico1',
+    start_idx: 224,
+    end_idx:   262,
+    invertir:  false,
+    dist_km:   0.87,
+    disciplinas: ['RP'],
+    es_ripio:  true
+  },
+  {
+    id: 'ripio_c1_t2',
+    nombre: "Ripio Tramo 2",
+    padre: 'collico1',
+    start_idx: 371,
+    end_idx:   379,
+    invertir:  false,
+    dist_km:   0.14,
+    disciplinas: ['RP'],
+    es_ripio:  true
+  },
+  {
+    id: 'ripio_c1_t3',
+    nombre: "Ripio Tramo 3",
+    padre: 'collico1',
+    start_idx: 436,
+    end_idx:   450,
+    invertir:  false,
+    dist_km:   0.26,
+    disciplinas: ['RP'],
+    es_ripio:  true
+  },
+  // --- Tramo de RIPIO dentro de El Muro (KMZ Pablo May 2026) ---
+  {
+    id: 'ripio_muro_t1',
+    nombre: "Ripio El Muro",
+    padre: 'el_muro',
+    start_idx: 50,
+    end_idx:   79,
+    invertir:  false,
+    dist_km:   0.90,
+    disciplinas: ['RP'],
+    es_ripio:  true
   }
 ];
 

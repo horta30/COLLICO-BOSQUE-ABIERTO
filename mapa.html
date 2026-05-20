@@ -479,27 +479,41 @@ function loadSubsegmentos() {
   SUBSEGMENTOS.forEach(sub => {
     const coords = getSubsegmentoCoords(sub.id);
     if (!coords || coords.length < 2) return;
+    
+    // Tramos de ripio: amarillo grava como Camino Principal de Ripio · línea más larga punteada
+    // Sub-segmentos normales: morado como antes
+    const esRipio = sub.es_ripio === true;
+    const colorLinea = esRipio ? '#F5C242' : '#A78BFA';
+    const dashArray  = esRipio ? [1.5, 1.5] : [2, 1.5];
+    const lineWidth  = esRipio ? 4 : 3;
+    
     const sourceId = 'sub-'+sub.id;
     const layerId  = 'sub-line-'+sub.id;
     map.addSource(sourceId, { type:'geojson', data:{ type:'Feature', geometry:{ type:'LineString', coordinates:coords } } });
     map.addLayer({
       id: layerId, type:'line', source: sourceId,
       layout:{'line-join':'round','line-cap':'round'},
-      paint:{ 'line-color':'#A78BFA', 'line-width':3, 'line-opacity':0.9, 'line-dasharray':[2,1.5] }
+      paint:{ 'line-color':colorLinea, 'line-width':lineWidth, 'line-opacity':0.95, 'line-dasharray':dashArray }
     });
     // Etiqueta flotante con nombre del sub-segmento (al medio del slice)
     const mid = coords[Math.floor(coords.length/2)];
     const wrap = document.createElement('div');
     wrap.className = 'subseg-wrap';
+    if (esRipio) wrap.classList.add('subseg-ripio');
     
-    // Punto pequeño morado (siempre visible)
+    // Punto pequeño (color según tipo)
     const dot = document.createElement('div');
-    dot.style.cssText = 'width:8px;height:8px;border-radius:50%;background:#A78BFA;border:1.5px solid rgba(255,255,255,.9);box-shadow:0 2px 4px rgba(0,0,0,.5);';
+    const colorDot = esRipio ? '#F5C242' : '#A78BFA';
+    dot.style.cssText = `width:8px;height:8px;border-radius:50%;background:${colorDot};border:1.5px solid rgba(255,255,255,.9);box-shadow:0 2px 4px rgba(0,0,0,.5);`;
     
     // Label (oculto hasta hover/tap)
     const lbl = document.createElement('div');
     lbl.className = 'subseg-lbl';
     lbl.textContent = sub.nombre;
+    if (esRipio) {
+      lbl.style.background = 'rgba(245,194,66,.95)';
+      lbl.style.color = '#1A1A1A';
+    }
     
     wrap.appendChild(dot);
     wrap.appendChild(lbl);
@@ -508,7 +522,11 @@ function loadSubsegmentos() {
         if (w !== wrap) w.classList.remove('show');
       });
       wrap.classList.toggle('show');
-      showNotif('🌀', sub.nombre, 'Sub-tramo de Collico 1 · '+sub.dist_km+' km', '#A78BFA');
+      const emoji = esRipio ? '🚜' : '🌀';
+      const desc  = esRipio
+        ? 'Tramo de ripio en Collico 1 · '+sub.dist_km+' km'
+        : 'Sub-tramo de Collico 1 · '+sub.dist_km+' km';
+      showNotif(emoji, sub.nombre, desc, colorDot);
     });
     new maplibregl.Marker({ element:wrap, anchor:'top' }).setLngLat(mid).addTo(map);
   });
@@ -689,16 +707,27 @@ function loadRipio() {
 // FILTRO POR DISCIPLINA
 // =============================================================================
 function filterByDisc(disc) {
+  // Senderos: ocultar/mostrar según disciplina
+  // Nota: Mirador del Puma y Mirador Kunstmann tienen disciplina ['RP','TR']
+  // → al filtrar RP, aparecen completos junto con el Camino Principal
   SENDEROS.forEach(s => {
+    // Camino Principal de Ripio se maneja en sus propias layers (ripio/ripio-glow)
     if (s.id === 'camino_principal') return;
     const v = (disc === 'ALL' || s.disciplinas.includes(disc)) ? 'visible' : 'none';
     if (map.getLayer('line-'+s.id)) map.setLayoutProperty('line-'+s.id,'visibility',v);
     if (map.getLayer('glow-'+s.id)) map.setLayoutProperty('glow-'+s.id,'visibility',v);
   });
-  // Ripio se muestra siempre que disc sea ALL o RP
+  // Sub-segmentos: filtrar por disciplinas (los de ripio aparecen con RP, los de trail con TR, etc.)
+  SUBSEGMENTOS.forEach(sub => {
+    const v = (disc === 'ALL' || (sub.disciplinas || []).includes(disc)) ? 'visible' : 'none';
+    if (map.getLayer('sub-line-'+sub.id)) map.setLayoutProperty('sub-line-'+sub.id,'visibility',v);
+  });
+  // Camino Principal de Ripio: visible en ALL o RP
   const showRipio = (disc === 'ALL' || disc === 'RP') ? 'visible' : 'none';
   if (map.getLayer('ripio'))      map.setLayoutProperty('ripio','visibility',showRipio);
   if (map.getLayer('ripio-glow')) map.setLayoutProperty('ripio-glow','visibility',showRipio);
+  
+  console.log(`[filtro ${disc}] aplicado · ripio: ${showRipio}`);
 }
 
 function setDisc(disc, btn) {
