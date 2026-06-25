@@ -1039,6 +1039,7 @@ function initFirebaseMonitor() {
   } catch(e) { console.warn('Firebase init:', e); }
 }
 
+let lastTrackWrite = 0;
 function publishGPS(lat, lng, acc) {
   if (!fbRef || !window._set) return;
   try {
@@ -1050,6 +1051,12 @@ function publishGPS(lat, lng, acc) {
       acc: Math.round(acc),
       ts: Date.now()
     });
+    const now = Date.now();
+    if (now - lastTrackWrite > 60000 && window._db && window._ref) {
+      const trackRef = window._ref(window._db, 'recorridos/' + v.uid + '/' + now);
+      window._set(trackRef, { lat, lng, acc: Math.round(acc) });
+      lastTrackWrite = now;
+    }
   } catch(e) { console.warn('GPS publish:', e); }
 }
 
